@@ -12,6 +12,7 @@ shot() { sleep "${2:-2}"; adb exec-out screencap -p > "$OUT/$1.png"; echo "shot 
 
 tap_text() {
   # tap the first node whose text or content-desc contains $1
+  if [ "$1" != "Wait" ] && type dismiss_system >/dev/null 2>&1; then dismiss_system; fi
   adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1
   adb pull /sdcard/ui.xml /tmp/ui.xml >/dev/null 2>&1
   local xy
@@ -52,6 +53,15 @@ crashed() {
   return 1
 }
 
+# Keep slow-emulator system dialogs ("Pixel Launcher isn't responding") from covering the app.
+adb shell settings put global hide_error_dialogs 1
+adb shell settings put global anr_show_background 0
+sleep 20
+dismiss_system() {
+  adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1
+  adb pull /sdcard/ui.xml /tmp/ui.xml >/dev/null 2>&1
+  if grep -q "isn't responding" /tmp/ui.xml; then tap_text "Wait"; sleep 1; fi
+}
 adb shell am start -W -n $PKG/com.wertvoll.graphro.MainActivity
 shot 00-splash 0.6
 shot 01-home 3
