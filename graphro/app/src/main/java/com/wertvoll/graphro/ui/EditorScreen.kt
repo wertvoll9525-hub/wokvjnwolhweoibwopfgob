@@ -283,7 +283,7 @@ private fun HighlightPanel(vm: AppViewModel, onNote: () -> Unit) {
     val e = vm.editor!!
     val spec = e.spec
     var targetEdit by remember { mutableStateOf(false) }
-    val modes = listOf(HighlightMode.MAX to I18n.tr("최댓값", "Maximum", "最大値"), HighlightMode.CHANGE to I18n.tr("큰 변화", "Biggest change", "大きな変化"), HighlightMode.MANUAL to I18n.tr("직접", "Manual", "手動"), HighlightMode.NONE to I18n.tr("없음", "None", "なし"))
+    val modes = listOf(HighlightMode.MAX to I18n.tr("최댓값", "Maximum", "最大値"), HighlightMode.CHANGE to I18n.tr("큰 변화", "Change", "変化"), HighlightMode.MANUAL to I18n.tr("직접", "Manual", "手動"), HighlightMode.NONE to I18n.tr("없음", "None", "なし"))
     val visible = if (e.data.isTime) modes else modes.filter { it.first != HighlightMode.CHANGE }
     PanelLabel("AUTO HIGHLIGHT")
     Segmented(visible.map { it.second }, visible.indexOfFirst { it.first == spec.highlightMode }.coerceAtLeast(0), { i ->

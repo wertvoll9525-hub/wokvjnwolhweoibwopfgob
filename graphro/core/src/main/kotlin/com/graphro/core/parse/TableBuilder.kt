@@ -307,7 +307,7 @@ object TableBuilder {
                 else -> {
                     val p = nums[r]!!.p
                     val shown = Format.plain(v / scale.factor)
-                    val unitText = listOf(scale.label, unit ?: "").filter { it.isNotEmpty() }.joinToString(" ")
+                    val unitText = com.graphro.core.model.unitLabelOf(scale, unit)
                     val fix = fixes[r] ?: when {
                         p.negativeMarker -> I18n.tr("‘${raw.trim()}’는 음수 표시라서 $shown(으)로 읽었어요", "“${raw.trim()}” marks a negative number, read as $shown", "「${raw.trim()}」はマイナス表記なので${shown}と読みました")
                         p.approx -> I18n.tr("‘약’을 빼고 $shown(으)로 읽었어요", "Read as $shown, ignoring “about”", "「約」を除いて${shown}と読みました")

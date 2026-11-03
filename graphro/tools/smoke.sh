@@ -9,11 +9,11 @@ UI_LANG=${2:-ko}
 # Visible labels the script taps, per app language.
 case "$UI_LANG" in
   en) L_SAMPLE="Sample"; L_DATA="read your table"; L_RAW="Original"; L_TABLE="Table"; L_MAKE="Make chart"; L_HL="Highlight"
-      L_CHANGE="Biggest change"; L_AXIS="Axis"; L_TYPE="Type"; L_BAR="Bar"; L_MANUAL="Manual"; L_OK="OK"; L_CHECK="Check"
+      L_CHANGE="Change"; L_AXIS="Axis"; L_TYPE="Type"; L_BAR="Bar"; L_MANUAL="Manual"; L_OK="OK"; L_CHECK="Check"
       L_EXPORT="Export"; L_SHEET="Excel"; L_SETTINGS="Settings"; L_PRIVACY="Privacy policy"; LOCALE=en-US
       SHARE='City\tPopulation\nNew York\t8,258,000\nLos Angeles\t3,821,000\nChicago\t2,665,000\nHouston\t2,314,000\nPhoenix\t1,650,000\nTotal\t18,708,000\n' ;;
   ja) L_SAMPLE="サンプル"; L_DATA="読み取りました"; L_RAW="原文"; L_TABLE="表"; L_MAKE="グラフを作成"; L_HL="強調"
-      L_CHANGE="大きな変化"; L_AXIS="軸"; L_TYPE="種類"; L_BAR="棒"; L_MANUAL="手動"; L_OK="OK"; L_CHECK="チェック"
+      L_CHANGE="変化"; L_AXIS="軸"; L_TYPE="種類"; L_BAR="棒"; L_MANUAL="手動"; L_OK="OK"; L_CHECK="チェック"
       L_EXPORT="書き出し"; L_SHEET="Excel"; L_SETTINGS="設定"; L_PRIVACY="プライバシーポリシー"; LOCALE=ja-JP
       SHARE='都市\t人口(人)\n東京\t14,047,594\n横浜\t3,777,491\n大阪\t2,752,412\n名古屋\t2,332,176\n札幌\t1,973,395\n合計\t24,883,068\n' ;;
   *)  L_SAMPLE="예제"; L_DATA="표를 이렇게"; L_RAW="원문"; L_TABLE="표"; L_MAKE="차트 만들기"; L_HL="강조"
@@ -66,7 +66,8 @@ wait_text() {
 }
 
 crashed() {
-  if adb logcat -d | grep -E "FATAL EXCEPTION|ANR in $PKG" >/dev/null; then
+  # Only crashes of the app itself count (uiautomator, the test tool, sometimes crashes on its own).
+  if adb logcat -d | grep -A 2 "FATAL EXCEPTION" | grep -q "Process: $PKG" || adb logcat -d | grep -q "ANR in $PKG"; then
     echo "!!! CRASH"; adb logcat -d | grep -A 40 "FATAL EXCEPTION" | head -80; return 0
   fi
   return 1
