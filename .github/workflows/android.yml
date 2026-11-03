@@ -78,12 +78,50 @@ jobs:
           cp app/build/outputs/apk/debug/app-debug.apk dist/ci/graphro-debug.apk
           cp app/build/outputs/bundle/release/app-release.aab dist/ci/graphro-release-unsigned.aab
           cp app/build/outputs/apk/release/*.apk dist/ci/graphro-release-unsigned.apk 2>/dev/null || true
-          cp app/build/outputs/mapping/release/mapping.txt dist/ci/mapping.txt 2>/dev/null || true
           echo "${GITHUB_SHA}" > dist/ci/SOURCE_COMMIT
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -f dist/ci
           git commit -m "CI 빌드 결과물 (${GITHUB_SHA::7}) [skip ci]" || exit 0
+          for i in 1 2 3; do
+            git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" && break
+            sleep 5
+          done
+
+  smoke:
+    needs: build
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: graphro-${{ github.sha }}
+          path: out
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Run the app on an emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: adb install -r out/app/build/outputs/apk/debug/app-debug.apk && bash graphro/tools/smoke.sh graphro/dist/ci/screens
+      - name: Save screenshots to the branch
+        if: always()
+        run: |
+          [ -d graphro/dist/ci/screens ] || exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f graphro/dist/ci/screens
+          git commit -m "에뮬레이터 실행 화면 (${GITHUB_SHA::7}) [skip ci]" || exit 0
           for i in 1 2 3; do
             git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" && break
             sleep 5
