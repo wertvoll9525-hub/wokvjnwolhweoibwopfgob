@@ -2,7 +2,7 @@
 # Drives the debug app on an emulator: taps through the main flow, saves screenshots and
 # fails if the app crashes. Taps are found by visible text through uiautomator.
 set -u
-PKG=com.wertvoll.graphro.debug
+PKG=${3:-com.wertvoll.graphro.debug}
 OUT=${1:-screens}
 UI_LANG=${2:-ko}
 

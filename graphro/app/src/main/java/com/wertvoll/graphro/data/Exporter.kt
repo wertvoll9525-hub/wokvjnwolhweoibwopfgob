@@ -140,7 +140,8 @@ object Exporter {
         c.drawText(metaLine(d).uppercase(), pad, y + meta.textSize, meta)
         y += meta.textSize + 10 * u
 
-        val headlineText = if (opt.headline && caption.isNotBlank()) caption.substringBefore(". ").removeSuffix(".").let { if (it.length > 44) spec.title else it } else spec.title
+        val (first, rest) = splitSentence(caption)
+        val headlineText = if (opt.headline && first.isNotBlank()) first.let { if (it.length > 44) spec.title else it } else spec.title
         val title = TextPaint(Paint.ANTI_ALIAS_FLAG).apply { typeface = fonts.sansBold; textSize = (if (opt.vertical) 21f else 19f) * u; color = Colors.INK; letterSpacing = -0.03f }
         y += TextBlock.draw(c, headlineText, title, pad, y, inner, maxLines = 2, spacing = 1.18f)
         val sub = TextPaint(Paint.ANTI_ALIAS_FLAG).apply { typeface = fonts.sans; textSize = 11.5f * u; color = Colors.BODY }
@@ -152,7 +153,7 @@ object Exporter {
         y += 14 * u
 
         val captionPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply { typeface = fonts.sans; textSize = 12.5f * u; color = Colors.BODY }
-        val bodyCaption = if (opt.headline && headlineText != spec.title) caption.substringAfter(". ", "").trim() else caption
+        val bodyCaption = if (opt.headline && headlineText != spec.title) rest else caption
         val capH = if (bodyCaption.isNotBlank()) TextBlock.height(bodyCaption, captionPaint, inner, maxLines = 3) + 14 * u else 0f
         val source = spec.source?.takeIf { opt.showSource && it.isNotBlank() }
         val footPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply { typeface = fonts.mono; textSize = 8.5f * u; color = 0xFF9A9AA0.toInt(); letterSpacing = 0.04f }
@@ -166,6 +167,13 @@ object Exporter {
         if (bodyCaption.isNotBlank()) { TextBlock.draw(c, bodyCaption, captionPaint, pad, y, inner, maxLines = 3); y += capH }
         if (source != null) c.drawText(I18n.tr("출처: $source", "Source: $source", "出典: $source"), pad, h - pad, footPaint)
         return bmp
+    }
+
+    /** First sentence (without its final period) and the rest. Handles ". " and the Japanese "。". */
+    fun splitSentence(text: String): Pair<String, String> {
+        val t = text.trim()
+        val m = Regex("^(.+?)(\\. |。)(.*)$", RegexOption.DOT_MATCHES_ALL).find(t) ?: return t.removeSuffix(".").removeSuffix("。") to ""
+        return m.groupValues[1] to m.groupValues[3].trim()
     }
 
     fun metaLine(d: ChartData): String {

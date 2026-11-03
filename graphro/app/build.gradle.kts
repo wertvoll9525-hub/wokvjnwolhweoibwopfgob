@@ -24,8 +24,8 @@ android {
         applicationId = "com.wertvoll.graphro"
         minSdk = 26
         targetSdk = 36
-        versionCode = 2
-        versionName = "1.1.0"
+        versionCode = 3
+        versionName = "1.1.1"
     }
 
     val storeFilePath = signingValue("GRAPHRO_STORE_FILE")
