@@ -1,0 +1,26 @@
+@font-face{font-family:P;src:url(file:///home/user/wokvjnwolhweoibwopfgob/graphro/app/src/main/res/font/pretendard_regular.otf);font-weight:400}
+@font-face{font-family:P;src:url(file:///home/user/wokvjnwolhweoibwopfgob/graphro/app/src/main/res/font/pretendard_semibold.otf);font-weight:600}
+@font-face{font-family:P;src:url(file:///home/user/wokvjnwolhweoibwopfgob/graphro/app/src/main/res/font/pretendard_bold.otf);font-weight:700}
+@font-face{font-family:M;src:url(file:///home/user/wokvjnwolhweoibwopfgob/graphro/app/src/main/res/font/plexmono_regular.ttf);font-weight:400}
+@font-face{font-family:M;src:url(file:///home/user/wokvjnwolhweoibwopfgob/graphro/app/src/main/res/font/plexmono_medium.ttf);font-weight:500}
+@font-face{font-family:M;src:url(file:///home/user/wokvjnwolhweoibwopfgob/graphro/app/src/main/res/font/plexmono_semibold.ttf);font-weight:600}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:P,sans-serif;color:#121212;-webkit-font-smoothing:antialiased}
+.mono{font-family:M,monospace}
+.meta{font-family:M,monospace;font-size:11px;font-weight:500;letter-spacing:.08em;color:#6E6E75}
+.screen{width:390px;height:844px;background:#fff;position:relative;overflow:hidden;display:flex;flex-direction:column}
+.bar{height:56px;display:flex;align-items:center;padding:0 12px 0 6px;flex:none}
+.ib{width:44px;height:44px;display:flex;align-items:center;justify-content:center}
+.pill{border-radius:99px;display:flex;align-items:center;justify-content:center;font-weight:600}
+.ink{background:#121212;color:#fff}.sig{background:#F04E23;color:#fff;font-weight:700}.out{border:1px solid #DADADC;background:#fff}
+.title{font-size:26px;font-weight:700;letter-spacing:-.045em;line-height:1.22}
+.panel{background:#F4F4F1;border-radius:24px;padding:16px}
+.dock{display:flex;background:#121212;border-radius:99px;padding:4px;align-self:center}
+.dock span{height:40px;padding:0 16px;border-radius:99px;display:flex;align-items:center;font-size:13px;font-weight:600;color:#CFCFD2}
+.dock span.on{background:#fff;color:#121212;font-weight:700}
+.seg{display:flex;background:#F4F4F1;border-radius:99px;padding:3px}
+.seg span{height:34px;padding:0 14px;border-radius:99px;display:flex;align-items:center;font-size:13px;font-weight:600}
+.seg span.on{background:#121212;color:#fff}
+.hair{height:1px;background:#ECECE9}
+.sw{width:48px;height:28px;border-radius:99px;background:#121212;padding:3px;display:flex;justify-content:flex-end}.sw i{width:22px;height:22px;border-radius:99px;background:#fff}
+.sw.off{background:#CFCFD2;justify-content:flex-start}
