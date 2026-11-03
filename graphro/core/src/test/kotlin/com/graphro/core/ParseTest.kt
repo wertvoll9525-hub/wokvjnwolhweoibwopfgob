@@ -319,3 +319,12 @@ class FixNoiseTest {
         assertEquals(1, r.candidates.size)
     }
 }
+
+class TotalInTimeColumnTest {
+    @Test fun totalLabelKept() {
+        val t = Importer.fromText("월\t매출\n1월\t320\n2월\t280\n3월\t410\n합계\t1010").best!!.table
+        assertEquals("합계", t.columns[0].cells[3].raw)
+        assertNull(t.columns[0].cells[3].fix)
+        assertEquals("합계 행이라 그래프에서 뺐어요", t.excludedRows[3])
+    }
+}

@@ -50,7 +50,7 @@ private fun shown(c: DataColumn, r: Int): String = when (val v = c.cells[r].valu
     is Value.Num -> Format.plain(v.v / c.scale.factor)
     is Value.Time -> v.t.fullLabel()
     is Value.Text -> v.s
-    Value.Empty -> if (c.cells[r].raw.isNotBlank() && c.cells[r].fix != null) "—" else ""
+    Value.Empty -> c.cells[r].raw
 }
 
 private fun typeLabel(c: DataColumn): String = when (c.type) {

@@ -52,7 +52,7 @@ tap_text "표" ; sleep 1
 tap_text "차트 만들기" || fail=1
 shot 03-editor 3
 tap_text "강조" && shot 04-highlight 2
-tap_text "가장 큰 변화" && shot 04b-change 2
+tap_text "큰 변화" && shot 04b-change 2
 tap_text "축" && shot 05-axis 2
 tap_text "종류" && sleep 1 && tap_text "막대" && shot 05b-bar 2
 tap_text "검사" && shot 06-check 2.5

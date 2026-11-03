@@ -145,7 +145,7 @@ object TableBuilder {
         val numCols = columns.indices.filter { columns[it].type == ColumnType.NUMBER }
         for (r in 0 until rowCount) {
             if (r in src.forceInclude) continue
-            val labels = columns.filter { it.type == ColumnType.TEXT }.mapNotNull { (it.cells[r].value as? Value.Text)?.s }
+            val labels = columns.filter { it.type != ColumnType.NUMBER }.map { it.cells[r].raw }
             if (labels.any { isTotalLabel(it) }) { excluded[r] = "합계 행이라 그래프에서 뺐어요"; continue }
         }
         if (numCols.isNotEmpty() && rowCount >= 4) {
@@ -225,7 +225,11 @@ object TableBuilder {
                 if (KoreanNumber.isEmptyToken(raw)) Cell(raw, Value.Empty)
                 else {
                     val t = TimeParser.parse(raw, allowBareYear, allowCompact)
-                    if (t != null) Cell(raw, Value.Time(t)) else Cell(raw, Value.Empty, "기간으로 읽을 수 없어서 비웠어요")
+                    when {
+                        t != null -> Cell(raw, Value.Time(t))
+                        isTotalLabel(raw) -> Cell(raw, Value.Empty)
+                        else -> Cell(raw, Value.Empty, "기간으로 읽을 수 없어서 비웠어요")
+                    }
                 }
             }
             return Column(name, ColumnType.TIME, cells)
