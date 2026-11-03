@@ -169,15 +169,17 @@ class ChartRenderer(private val fonts: ChartFonts, private val u: Float) {
         }
     }
 
+    // Values outside a user-set axis range are pinned to the plot edge so nothing is drawn
+    // over the labels; the honesty check tells the user about cut or exaggerated bars.
     private fun yOf(v: Double, l: ChartLayout, d: ChartData): Float {
         val ax = d.axis!!
-        val t = ((v - ax.min) / (ax.max - ax.min)).toFloat()
+        val t = ((v - ax.min) / (ax.max - ax.min)).toFloat().coerceIn(0f, 1.04f)
         return l.plot.bottom - t * l.plot.height()
     }
 
     private fun xOfValue(v: Double, l: ChartLayout, d: ChartData): Float {
         val ax = d.axis!!
-        val t = ((v - ax.min) / (ax.max - ax.min)).toFloat()
+        val t = ((v - ax.min) / (ax.max - ax.min)).toFloat().coerceIn(0f, 1.02f)
         return l.plot.left + t * l.plot.width()
     }
 
