@@ -167,9 +167,8 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
             }
             busy = false
             val (pair, error, name) = result
-            val r = pair?.first
-            if (r == null || r.candidates.isEmpty()) { toast = error ?: "표를 찾지 못했어요"; return@launch }
-            startReview(r.candidates, pair.second, name)
+            if (pair == null || pair.first.candidates.isEmpty()) { toast = error ?: "표를 찾지 못했어요"; return@launch }
+            startReview(pair.first.candidates, pair.second, name)
         }
     }
 

@@ -52,7 +52,7 @@ class MainActivity : ComponentActivity() {
         when (intent.action) {
             Intent.ACTION_SEND -> {
                 val stream: Uri? = if (Build.VERSION.SDK_INT >= 33) intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
-                else @Suppress("DEPRECATION") intent.getParcelableExtra(Intent.EXTRA_STREAM)
+                else @Suppress("DEPRECATION") intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
                 if (stream != null) { vm.importUri(this, stream); return true }
                 val text = intent.getCharSequenceExtra(Intent.EXTRA_TEXT)?.toString()
                 if (!text.isNullOrBlank()) { vm.importText(text, "공유받은 내용"); return true }

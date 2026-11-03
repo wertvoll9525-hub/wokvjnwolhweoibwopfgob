@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
 
 plugins {
     id("com.android.application")
@@ -9,7 +10,7 @@ plugins {
 // Release signing comes from environment variables (CI secrets) or a local signing.properties
 // file that is never committed. Without either, the release bundle is built unsigned and can be
 // signed afterwards with jarsigner.
-val signingProps = java.util.Properties().apply {
+val signingProps = Properties().apply {
     val f = rootProject.file("signing.properties")
     if (f.exists()) f.inputStream().use { load(it) }
 }
