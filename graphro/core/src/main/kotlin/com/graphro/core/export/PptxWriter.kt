@@ -6,6 +6,7 @@ import com.graphro.core.chart.ChartType
 import com.graphro.core.chart.Colors
 import com.graphro.core.chart.AxisMode
 import com.graphro.core.text.Format
+import com.graphro.core.text.I18n
 
 /**
  * Builds a 16:9 .pptx whose chart is a real PowerPoint chart (editable data), not a picture.
@@ -16,7 +17,7 @@ object PptxWriter {
         val caption: String? = null,
         val speakerNotes: String? = null,
         val table: List<List<String>>? = null,
-        val font: String = "맑은 고딕",
+        val font: String = I18n.officeFont,
     )
 
     private const val W = 12192000L
@@ -63,7 +64,7 @@ object PptxWriter {
             "<Relationship Id=\"rId2\" Type=\"http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties\" Target=\"docProps/core.xml\"/>" +
             "<Relationship Id=\"rId3\" Type=\"$REL/extended-properties\" Target=\"docProps/app.xml\"/>" +
             "</Relationships>")
-        z.add("docProps/core.xml", Xml.HEAD + "<cp:coreProperties xmlns:cp=\"http://schemas.openxmlformats.org/package/2006/metadata/core-properties\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:dcterms=\"http://purl.org/dc/terms/\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"><dc:title>${Xml.esc(spec.title)}</dc:title><dc:creator>그래프로</dc:creator></cp:coreProperties>")
+        z.add("docProps/core.xml", Xml.HEAD + "<cp:coreProperties xmlns:cp=\"http://schemas.openxmlformats.org/package/2006/metadata/core-properties\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:dcterms=\"http://purl.org/dc/terms/\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"><dc:title>${Xml.esc(spec.title)}</dc:title><dc:creator>Graphro</dc:creator></cp:coreProperties>")
         z.add("docProps/app.xml", Xml.HEAD + "<Properties xmlns=\"http://schemas.openxmlformats.org/officeDocument/2006/extended-properties\"><Application>Graphro</Application><Slides>$slides</Slides></Properties>")
 
         // presentation
@@ -150,7 +151,7 @@ object PptxWriter {
         var y = 457200L
         sb.append(textBox(2, "제목", m, y, innerW, 600000, spec.title, 2800, "121212", true, opt.font))
         y += 640000
-        if (d.unitLabel.isNotEmpty()) sb.append(textBox(3, "단위", m, y, innerW, 300000, "단위: ${d.unitLabel}", 1300, "6E6E75", false, opt.font))
+        if (d.unitLabel.isNotEmpty()) sb.append(textBox(3, "단위", m, y, innerW, 300000, "${I18n.tr("단위", "Unit", "単位")}: ${d.unitLabel}", 1300, "6E6E75", false, opt.font))
         y += 380000
         val captionH = if (!opt.caption.isNullOrBlank()) 520000L else 0L
         val sourceH = if (!spec.source.isNullOrBlank()) 300000L else 0L
@@ -160,7 +161,7 @@ object PptxWriter {
         sb.append("<a:graphic><a:graphicData uri=\"$NS_C\"><c:chart xmlns:c=\"$NS_C\" r:id=\"rId2\"/></a:graphicData></a:graphic></p:graphicFrame>")
         y += chartH + 80000
         if (!opt.caption.isNullOrBlank()) { sb.append(textBox(5, "해석", m, y, innerW, 440000, opt.caption, 1600, "4A4A50", false, opt.font)); y += captionH }
-        if (!spec.source.isNullOrBlank()) sb.append(textBox(6, "출처", m, y, innerW, 260000, "출처: ${spec.source}", 1100, "9A9AA0", false, opt.font))
+        if (!spec.source.isNullOrBlank()) sb.append(textBox(6, "출처", m, y, innerW, 260000, "${I18n.tr("출처", "Source", "出典")}: ${spec.source}", 1100, "9A9AA0", false, opt.font))
         return Xml.HEAD + "<p:sld xmlns:a=\"$NS_A\" xmlns:r=\"$NS_R\" xmlns:p=\"$NS_P\"><p:cSld>${emptyTree(sb.toString())}</p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>"
     }
 
@@ -172,7 +173,7 @@ object PptxWriter {
         val colW = innerW / cols
         val rowH = 340000L
         val sb = StringBuilder()
-        sb.append(textBox(2, "제목", m, 457200, innerW, 600000, "$title · 원본 표", 2400, "121212", true, font))
+        sb.append(textBox(2, "제목", m, 457200, innerW, 600000, "$title · ${I18n.tr("원본 표", "Source table", "元の表")}", 2400, "121212", true, font))
         sb.append("<p:graphicFrame><p:nvGraphicFramePr><p:cNvPr id=\"3\" name=\"표\"/><p:cNvGraphicFramePr><a:graphicFrameLocks noGrp=\"1\"/></p:cNvGraphicFramePr><p:nvPr/></p:nvGraphicFramePr>")
         sb.append("<p:xfrm><a:off x=\"$m\" y=\"1280160\"/><a:ext cx=\"${colW * cols}\" cy=\"${rowH * rows.size}\"/></p:xfrm>")
         sb.append("<a:graphic><a:graphicData uri=\"http://schemas.openxmlformats.org/drawingml/2006/table\"><a:tbl><a:tblPr firstRow=\"1\"/><a:tblGrid>")
@@ -193,7 +194,7 @@ object PptxWriter {
             sb.append("</a:tr>")
         }
         sb.append("</a:tbl></a:graphicData></a:graphic></p:graphicFrame>")
-        if (table.size > 16) sb.append(textBox(4, "안내", m, 1280160 + rowH * rows.size + 120000, innerW, 260000, "처음 15행만 표시했어요 (전체 ${table.size - 1}행)", 1100, "9A9AA0", false, font))
+        if (table.size > 16) sb.append(textBox(4, "안내", m, 1280160 + rowH * rows.size + 120000, innerW, 260000, I18n.tr("처음 15행만 표시했어요 (전체 ${table.size - 1}행)", "Showing the first 15 rows (of ${table.size - 1})", "最初の15行のみ表示しています（全${table.size - 1}行）"), 1100, "9A9AA0", false, font))
         return Xml.HEAD + "<p:sld xmlns:a=\"$NS_A\" xmlns:r=\"$NS_R\" xmlns:p=\"$NS_P\"><p:cSld>${emptyTree(sb.toString())}</p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>"
     }
 
@@ -240,11 +241,11 @@ object PptxWriter {
     // ---- chart part ----
 
     fun chartSheetRows(d: ChartData, spec: ChartSpec): List<List<Any?>> {
-        val header = mutableListOf<Any?>(if (d.isTime) "기간" else "항목")
+        val header = mutableListOf<Any?>(if (d.isTime) I18n.period() else I18n.item())
         val series = if (spec.type == ChartType.DONUT) d.series.take(1) else d.series
         series.forEach { header.add(it.name) }
         val target = spec.target?.takeIf { spec.type != ChartType.DONUT && spec.type != ChartType.HBAR }
-        if (target != null) header.add("목표")
+        if (target != null) header.add(I18n.tr("목표", "Target", "目標"))
         val rows = mutableListOf<List<Any?>>(header)
         for (i in d.categories.indices) {
             val r = mutableListOf<Any?>(d.categories[i])
@@ -305,7 +306,7 @@ object PptxWriter {
         val target = spec.target?.takeIf { spec.type != ChartType.DONUT && spec.type != ChartType.HBAR }
         fun targetSeries(): String = buildString {
             if (target == null) return@buildString
-            append("<c:ser><c:idx val=\"$targetIdx\"/><c:order val=\"$targetIdx\"/><c:tx>${strRef("Sheet1!\$${colRef(targetIdx)}\$1", listOf("목표"))}</c:tx>")
+            append("<c:ser><c:idx val=\"$targetIdx\"/><c:order val=\"$targetIdx\"/><c:tx>${strRef("Sheet1!\$${colRef(targetIdx)}\$1", listOf(I18n.tr("목표", "Target", "目標")))}</c:tx>")
             append("<c:spPr><a:ln w=\"15875\" cap=\"rnd\">${solid("121212")}<a:prstDash val=\"dash\"/></a:ln></c:spPr><c:marker><c:symbol val=\"none\"/></c:marker>")
             append("<c:cat>${strRef(catRef, d.categories)}</c:cat><c:val>${numRef("Sheet1!\$${colRef(targetIdx)}\$2:\$${colRef(targetIdx)}\$${n + 1}", List(n) { target }, fmt)}</c:val><c:smooth val=\"0\"/></c:ser>")
         }
@@ -413,10 +414,10 @@ object PptxWriter {
         val avg = idx.sumOf { s.values[it]!! } / idx.size
         return buildString {
             if (caption.isNotBlank()) append(caption).append('\n')
-            append("· 가장 큼: ${d.fullCategories[mx]} ${d.withUnit(s.values[mx]!!)}\n")
-            append("· 가장 작음: ${d.fullCategories[mn]} ${d.withUnit(s.values[mn]!!)}\n")
-            append("· 평균: ${Format.withUnit(avg, d.scale.label, d.unit, d.decimals.coerceAtLeast(if (avg < 100) 1 else 0))}\n")
-            append("· 항목 수: ${idx.size}개")
+            append("· ${I18n.tr("가장 큼", "Highest", "最大")}: ${d.fullCategories[mx]} ${d.withUnit(s.values[mx]!!)}\n")
+            append("· ${I18n.tr("가장 작음", "Lowest", "最小")}: ${d.fullCategories[mn]} ${d.withUnit(s.values[mn]!!)}\n")
+            append("· ${I18n.tr("평균", "Average", "平均")}: ${Format.withUnit(avg, d.scale.label, d.unit, d.decimals.coerceAtLeast(if (avg < 100) 1 else 0))}\n")
+            append("· ${I18n.tr("항목 수", "Items", "項目数")}: ${idx.size}")
         }
     }
 }

@@ -1,5 +1,7 @@
 package com.wertvoll.graphro.data
 
+import com.graphro.core.text.I18n
+
 import android.content.ClipData
 import android.content.Context
 import android.content.Intent
@@ -27,9 +29,9 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 
 enum class ExportFormat(val ext: String, val mime: String, val label: String) {
-    IMAGE("png", "image/png", "이미지"),
+    IMAGE("png", "image/png", I18n.tr("이미지", "Image", "画像")),
     PPT("pptx", "application/vnd.openxmlformats-officedocument.presentationml.presentation", "PPT"),
-    SHEET("xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "엑셀"),
+    SHEET("xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", I18n.tr("엑셀", "Excel", "Excel")),
 }
 
 data class ExportOptions(
@@ -49,7 +51,7 @@ data class ExportOptions(
 object Exporter {
 
     fun fileName(spec: ChartSpec, f: ExportFormat): String {
-        val base = spec.title.replace(Regex("[\\\\/:*?\"<>|\\n\\r\\t]"), " ").trim().take(60).ifEmpty { "그래프로 차트" }
+        val base = spec.title.replace(Regex("[\\\\/:*?\"<>|\\n\\r\\t]"), " ").trim().take(60).ifEmpty { I18n.tr("그래프로 차트", "Graphro chart", "グラフロのグラフ") }
         return "$base.${f.ext}"
     }
 
@@ -74,16 +76,16 @@ object Exporter {
             )
             ExportFormat.SHEET -> {
                 val sheets = ArrayList<SheetData>()
-                sheets += SheetData("데이터", tableValues(table))
+                sheets += SheetData(I18n.tr("데이터", "Data", "データ"), tableValues(table))
                 if (opt.fixesSheet) {
                     val fixes = table.fixes()
-                    val rows = mutableListOf<List<Any?>>(listOf("행", "열", "원문", "앱이 읽은 값", "설명"))
+                    val rows = mutableListOf<List<Any?>>(listOf(I18n.tr("행", "Row", "行"), I18n.tr("열", "Column", "列"), I18n.tr("원문", "Original", "原文"), I18n.tr("앱이 읽은 값", "Read as", "アプリが読んだ値"), I18n.tr("설명", "Reason", "説明")))
                     fixes.forEach { f -> val c = table.columns[f.column]; rows += listOf(f.row + 2.0, c.name, c.cells[f.row].raw, c.scaled(f.row), f.message) }
-                    table.excludedRows.forEach { (r, why) -> rows += listOf(r + 2.0, "(행 전체)", table.columns.firstOrNull()?.cells?.getOrNull(r)?.raw, null, why) }
-                    if (rows.size > 1) sheets += SheetData("고친 곳", rows)
+                    table.excludedRows.forEach { (r, why) -> rows += listOf(r + 2.0, I18n.tr("(행 전체)", "(whole row)", "（行全体）"), table.columns.firstOrNull()?.cells?.getOrNull(r)?.raw, null, why) }
+                    if (rows.size > 1) sheets += SheetData(I18n.tr("고친 곳", "Fixes", "修正箇所"), rows)
                 }
                 if (opt.rawSheet && !rawText.isNullOrBlank()) {
-                    sheets += SheetData("원문", rawText.lines().map { listOf(it) }, headerRow = false, colWidths = listOf(80.0))
+                    sheets += SheetData(I18n.tr("원문", "Original", "原文"), rawText.lines().map { listOf(it) }, headerRow = false, colWidths = listOf(80.0))
                 }
                 XlsxWriter.write(sheets)
             }
@@ -144,7 +146,7 @@ object Exporter {
         val sub = TextPaint(Paint.ANTI_ALIAS_FLAG).apply { typeface = fonts.sans; textSize = 11.5f * u; color = Colors.BODY }
         val subText = buildString {
             if (headlineText != spec.title) append(spec.title)
-            if (d.unitLabel.isNotEmpty()) { if (isNotEmpty()) append(" · "); append("단위: ${d.unitLabel}") }
+            if (d.unitLabel.isNotEmpty()) { if (isNotEmpty()) append(" · "); append(I18n.tr("단위: ${d.unitLabel}", "Unit: ${d.unitLabel}", "単位: ${d.unitLabel}")) }
         }
         if (subText.isNotEmpty()) { y += 6 * u; y += TextBlock.draw(c, subText, sub, pad, y, inner, maxLines = 1) }
         y += 14 * u
@@ -162,7 +164,7 @@ object Exporter {
         c.restore()
         y += chartH + 14 * u
         if (bodyCaption.isNotBlank()) { TextBlock.draw(c, bodyCaption, captionPaint, pad, y, inner, maxLines = 3); y += capH }
-        if (source != null) c.drawText("출처: $source", pad, h - pad, footPaint)
+        if (source != null) c.drawText(I18n.tr("출처: $source", "Source: $source", "出典: $source"), pad, h - pad, footPaint)
         return bmp
     }
 
@@ -187,6 +189,6 @@ object Exporter {
             clipData = ClipData.newRawUri(file.name, uri)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
-        return Intent.createChooser(send, "공유").apply { addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION) }
+        return Intent.createChooser(send, I18n.tr("공유", "Share", "共有")).apply { addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION) }
     }
 }

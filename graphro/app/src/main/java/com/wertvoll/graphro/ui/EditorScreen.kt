@@ -1,5 +1,7 @@
 package com.wertvoll.graphro.ui
 
+import com.graphro.core.text.I18n
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -69,7 +71,7 @@ import com.graphro.core.text.Format
 import com.wertvoll.graphro.AppViewModel
 import com.wertvoll.graphro.chart.ChartView
 
-private val TABS = listOf("종류", "강조", "축", "라벨", "값")
+private val TABS = listOf(I18n.tr("종류", "Type", "種類"), I18n.tr("강조", "Highlight", "強調"), I18n.tr("축", "Axis", "軸"), I18n.tr("라벨", "Labels", "ラベル"), I18n.tr("값", "Values", "値"))
 
 @Composable
 fun EditorScreen(vm: AppViewModel) {
@@ -90,17 +92,17 @@ fun EditorScreen(vm: AppViewModel) {
     Box(Modifier.fillMaxSize().background(G.Paper)) {
         Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
             Row(Modifier.fillMaxWidth().height(56.dp).padding(start = 6.dp, end = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-                IconAction(Ic.Back, "뒤로", { vm.goBack() })
+                IconAction(Ic.Back, I18n.tr("뒤로", "Back", "戻る"), { vm.goBack() })
                 Spacer(Modifier.weight(1f))
                 Text(
-                    "표", style = T.smallStrong,
+                    I18n.tr("표", "Table", "表"), style = T.smallStrong,
                     modifier = Modifier.clip(RoundedCornerShape(50)).clickable(role = Role.Button) { vm.reviewProjectData() }
-                        .semantics { contentDescription = "표 확인하고 고치기" }.padding(horizontal = 12.dp, vertical = 10.dp),
+                        .semantics { contentDescription = I18n.tr("표 확인하고 고치기", "Review and edit the table", "表を確認・修正") }.padding(horizontal = 12.dp, vertical = 10.dp),
                 )
-                IconAction(Ic.Undo, "되돌리기", { vm.undo() }, enabled = e.undo.isNotEmpty())
-                IconAction(Ic.Redo, "다시 하기", { vm.redo() }, enabled = e.redo.isNotEmpty())
+                IconAction(Ic.Undo, I18n.tr("되돌리기", "Undo", "元に戻す"), { vm.undo() }, enabled = e.undo.isNotEmpty())
+                IconAction(Ic.Redo, I18n.tr("다시 하기", "Redo", "やり直す"), { vm.redo() }, enabled = e.redo.isNotEmpty())
                 Spacer(Modifier.width(6.dp))
-                Pill("내보내기", { showExport = true }, height = 40.dp, textStyle = T.smallStrong.copy(fontSize = T.button.fontSize * 0.95f))
+                Pill(I18n.tr("내보내기", "Export", "書き出し"), { showExport = true }, height = 40.dp, textStyle = T.smallStrong.copy(fontSize = T.button.fontSize * 0.95f))
             }
 
             Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
@@ -108,7 +110,7 @@ fun EditorScreen(vm: AppViewModel) {
                     Meta("${spec.type.code} · ${d.size} ${if (d.isTime) "POINTS" else "ITEMS"}" + (if (d.unitLabel.isNotEmpty()) " · ${d.unitLabel}" else ""))
                     Spacer(Modifier.height(8.dp))
                     Row(
-                        Modifier.clip(RoundedCornerShape(8.dp)).clickable { renaming = true }.semantics { contentDescription = "제목: ${spec.title}. 눌러서 고치기" },
+                        Modifier.clip(RoundedCornerShape(8.dp)).clickable { renaming = true }.semantics { contentDescription = I18n.tr("제목: ${spec.title}. 눌러서 고치기", "Title: ${spec.title}. Tap to edit", "タイトル: ${spec.title}。タップして編集") },
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(spec.title, style = T.title, maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
@@ -135,10 +137,10 @@ fun EditorScreen(vm: AppViewModel) {
                             Modifier.shadow(8.dp, RoundedCornerShape(50)).clip(RoundedCornerShape(50)).background(G.Ink).padding(4.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Text("강조 해제", style = T.smallStrong.copy(color = G.Paper), modifier = Modifier.clip(RoundedCornerShape(50)).clickable {
+                            Text(I18n.tr("강조 해제", "Clear highlight", "強調を解除"), style = T.smallStrong.copy(color = G.Paper), modifier = Modifier.clip(RoundedCornerShape(50)).clickable {
                                 vm.updateSpec { it.copy(highlightMode = HighlightMode.NONE) }; popover = false
                             }.padding(horizontal = 14.dp, vertical = 9.dp))
-                            Text("메모 달기", style = T.smallStrong, modifier = Modifier.clip(RoundedCornerShape(50)).background(G.Paper).clickable {
+                            Text(I18n.tr("메모 달기", "Add note", "メモを付ける"), style = T.smallStrong, modifier = Modifier.clip(RoundedCornerShape(50)).background(G.Paper).clickable {
                                 noteEdit = true; popover = false
                             }.padding(horizontal = 14.dp, vertical = 9.dp))
                         }
@@ -157,9 +159,9 @@ fun EditorScreen(vm: AppViewModel) {
                         Spacer(Modifier.width(8.dp))
                         Text(
                             when {
-                                check.fixCount > 0 -> "검사 · 고칠 것 ${check.fixCount}"
-                                check.noteCount > 0 -> "검사 통과 · 참고 ${check.noteCount}"
-                                else -> "검사 통과"
+                                check.fixCount > 0 -> I18n.tr("검사 · 고칠 것 ${check.fixCount}", "Check · ${check.fixCount} to fix", "チェック · 要修正 ${check.fixCount}")
+                                check.noteCount > 0 -> I18n.tr("검사 통과 · 참고 ${check.noteCount}", "Check passed · ${check.noteCount} note(s)", "チェック合格 · 注意 ${check.noteCount}")
+                                else -> I18n.tr("검사 통과", "Check passed", "チェック合格")
                             },
                             style = T.smallStrong,
                         )
@@ -203,8 +205,8 @@ fun EditorScreen(vm: AppViewModel) {
         ExportSheet(vm, showExport) { showExport = false }
     }
 
-    if (renaming) TextInputDialog("차트 제목", spec.title, { renaming = false }, { t -> vm.updateSpec { it.copy(title = t.trim().ifEmpty { it.title }) }; renaming = false })
-    if (noteEdit) TextInputDialog("강조한 곳에 메모", spec.note ?: "", { noteEdit = false }, { t -> vm.updateSpec { it.copy(note = t.trim().ifEmpty { null }) }; noteEdit = false }, placeholder = "예: 신메뉴 출시")
+    if (renaming) TextInputDialog(I18n.tr("차트 제목", "Chart title", "グラフのタイトル"), spec.title, { renaming = false }, { t -> vm.updateSpec { it.copy(title = t.trim().ifEmpty { it.title }) }; renaming = false })
+    if (noteEdit) TextInputDialog(I18n.tr("강조한 곳에 메모", "Note on the highlight", "強調箇所へのメモ"), spec.note ?: "", { noteEdit = false }, { t -> vm.updateSpec { it.copy(note = t.trim().ifEmpty { null }) }; noteEdit = false }, placeholder = I18n.tr("예: 신메뉴 출시", "e.g. New menu launched", "例: 新メニュー発売"))
 }
 
 @Composable
@@ -246,7 +248,7 @@ private fun TypePanel(vm: AppViewModel, recs: List<com.graphro.core.chart.Recomm
             }
         }
         Spacer(Modifier.height(4.dp))
-        Text(rec?.reason ?: "이 데이터에는 잘 맞지 않을 수 있어요.", style = T.small)
+        Text(rec?.reason ?: I18n.tr("이 데이터에는 잘 맞지 않을 수 있어요.", "May not suit this data.", "このデータには合わないかもしれません。"), style = T.small)
     }
 }
 
@@ -281,7 +283,7 @@ private fun HighlightPanel(vm: AppViewModel, onNote: () -> Unit) {
     val e = vm.editor!!
     val spec = e.spec
     var targetEdit by remember { mutableStateOf(false) }
-    val modes = listOf(HighlightMode.MAX to "최댓값", HighlightMode.CHANGE to "큰 변화", HighlightMode.MANUAL to "직접", HighlightMode.NONE to "없음")
+    val modes = listOf(HighlightMode.MAX to I18n.tr("최댓값", "Maximum", "最大値"), HighlightMode.CHANGE to I18n.tr("큰 변화", "Biggest change", "大きな変化"), HighlightMode.MANUAL to I18n.tr("직접", "Manual", "手動"), HighlightMode.NONE to I18n.tr("없음", "None", "なし"))
     val visible = if (e.data.isTime) modes else modes.filter { it.first != HighlightMode.CHANGE }
     PanelLabel("AUTO HIGHLIGHT")
     Segmented(visible.map { it.second }, visible.indexOfFirst { it.first == spec.highlightMode }.coerceAtLeast(0), { i ->
@@ -292,32 +294,32 @@ private fun HighlightPanel(vm: AppViewModel, onNote: () -> Unit) {
         }
     }, Modifier.fillMaxWidth(), dark = false, fill = true, itemHeight = 40.dp, background = G.Line2)
     if (spec.highlightMode == HighlightMode.MANUAL) {
-        Text("차트에서 막대나 점을 눌러 고를 수 있어요.", style = T.small.copy(color = G.Sub), modifier = Modifier.padding(start = 4.dp, top = 8.dp))
+        Text(I18n.tr("차트에서 막대나 점을 눌러 고를 수 있어요.", "Tap a bar or point on the chart to pick it.", "グラフの棒や点をタップして選べます。"), style = T.small.copy(color = G.Sub), modifier = Modifier.padding(start = 4.dp, top = 8.dp))
     }
     Spacer(Modifier.height(8.dp))
     Hairline(color = G.Line2)
     Row(Modifier.fillMaxWidth().heightIn(min = 52.dp).padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f).clickable { targetEdit = true }) {
-            Text("목표선", style = T.smallStrong)
-            Text(spec.target?.let { "${Format.plain(it)} ${e.data.unitLabel}".trim() + " · 눌러서 바꾸기" } ?: "기준이 되는 값을 선으로", style = T.small.copy(color = G.Sub))
+            Text(I18n.tr("목표선", "Target line", "目標線"), style = T.smallStrong)
+            Text(spec.target?.let { "${Format.plain(it)} ${e.data.unitLabel}".trim() + I18n.tr(" · 눌러서 바꾸기", " · tap to change", " · タップで変更") } ?: I18n.tr("기준이 되는 값을 선으로", "Draw a reference value as a line", "基準となる値を線で表示"), style = T.small.copy(color = G.Sub))
         }
         Toggle(spec.target != null, { on ->
             if (on) targetEdit = true else vm.updateSpec { it.copy(target = null) }
-        }, "목표선")
+        }, I18n.tr("목표선", "Target line", "目標線"))
     }
     Hairline(color = G.Line2)
     Row(Modifier.fillMaxWidth().heightIn(min = 52.dp).padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text("평균선", style = T.smallStrong, modifier = Modifier.weight(1f))
-        Toggle(spec.showAverage, { on -> vm.updateSpec { it.copy(showAverage = on) } }, "평균선")
+        Text(I18n.tr("평균선", "Average line", "平均線"), style = T.smallStrong, modifier = Modifier.weight(1f))
+        Toggle(spec.showAverage, { on -> vm.updateSpec { it.copy(showAverage = on) } }, I18n.tr("평균선", "Average line", "平均線"))
     }
     Hairline(color = G.Line2)
     Row(Modifier.fillMaxWidth().heightIn(min = 52.dp).padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text("강조 색", style = T.smallStrong, modifier = Modifier.weight(1f))
-        listOf(Colors.SIGNAL to "주홍", Colors.INDIGO to "남색", Colors.INK to "먹색").forEach { (c, name) ->
+        Text(I18n.tr("강조 색", "Highlight color", "強調色"), style = T.smallStrong, modifier = Modifier.weight(1f))
+        listOf(Colors.SIGNAL to I18n.tr("주홍", "Vermilion", "朱"), Colors.INDIGO to I18n.tr("남색", "Indigo", "藍"), Colors.INK to I18n.tr("먹색", "Ink", "墨")).forEach { (c, name) ->
             val on = spec.highlightColor == c
             Box(
                 Modifier.size(40.dp).clip(CircleShape).clickable(role = Role.RadioButton) { vm.updateSpec { it.copy(highlightColor = c) } }
-                    .semantics { contentDescription = "$name${if (on) ", 선택됨" else ""}" },
+                    .semantics { contentDescription = "$name${if (on) I18n.tr(", 선택됨", ", selected", "、選択中") else ""}" },
                 contentAlignment = Alignment.Center,
             ) {
                 Box(
@@ -330,22 +332,22 @@ private fun HighlightPanel(vm: AppViewModel, onNote: () -> Unit) {
     Hairline(color = G.Line2)
     Row(Modifier.fillMaxWidth().heightIn(min = 52.dp).clickable(onClick = onNote).padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
-            Text("메모", style = T.smallStrong)
-            Text(spec.note ?: "강조한 곳 위에 짧은 설명을 달아요", style = T.small.copy(color = G.Sub), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(I18n.tr("메모", "Note", "メモ"), style = T.smallStrong)
+            Text(spec.note ?: I18n.tr("강조한 곳 위에 짧은 설명을 달아요", "Add a short note above the highlight", "強調した所に短い説明を付けます"), style = T.small.copy(color = G.Sub), maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
         SvgIcon(Ic.Chevron, color = G.Sub, size = 14.dp)
     }
     if (targetEdit) {
         TextInputDialog(
-            "목표선 값 (${e.data.unitLabel.ifEmpty { "표의 단위" }})",
+            I18n.tr("목표선 값", "Target value", "目標値") + " (${e.data.unitLabel.ifEmpty { I18n.tr("표의 단위", "table units", "表の単位") }})",
             spec.target?.let { Format.plain(it) } ?: "",
             { targetEdit = false },
             { t ->
                 val v = t.replace(",", "").trim().toDoubleOrNull()
-                if (v == null) vm.toast = "숫자를 입력해 주세요" else vm.updateSpec { it.copy(target = v) }
+                if (v == null) vm.toast = I18n.tr("숫자를 입력해 주세요", "Please enter a number", "数値を入力してください") else vm.updateSpec { it.copy(target = v) }
                 targetEdit = false
             },
-            keyboard = KeyboardType.Decimal, placeholder = "예: 400",
+            keyboard = KeyboardType.Decimal, placeholder = I18n.tr("예: 400", "e.g. 400", "例: 400"),
         )
     }
 }
@@ -356,35 +358,35 @@ private fun AxisPanel(vm: AppViewModel) {
     val spec = e.spec
     var custom by remember { mutableStateOf(false) }
     if (spec.type == ChartType.DONUT) {
-        Text("도넛 그래프에는 축이 없어요.", style = T.small, modifier = Modifier.padding(4.dp))
+        Text(I18n.tr("도넛 그래프에는 축이 없어요.", "Donut charts have no axis.", "ドーナツグラフには軸がありません。"), style = T.small, modifier = Modifier.padding(4.dp))
         return
     }
     PanelLabel("VALUE AXIS")
-    val modes = listOf(AxisMode.AUTO to "자동", AxisMode.ZERO to "0부터", AxisMode.CUSTOM to "직접")
+    val modes = listOf(AxisMode.AUTO to I18n.tr("자동", "Auto", "自動"), AxisMode.ZERO to I18n.tr("0부터", "From 0", "0から"), AxisMode.CUSTOM to I18n.tr("직접", "Manual", "手動"))
     Segmented(modes.map { it.second }, modes.indexOfFirst { it.first == spec.axisMode }, { i ->
         if (modes[i].first == AxisMode.CUSTOM) custom = true else vm.updateSpec { it.copy(axisMode = modes[i].first) }
     }, Modifier.fillMaxWidth(), dark = false, fill = true, itemHeight = 40.dp, background = G.Line2)
     e.data.axis?.let { ax ->
-        Text("지금 범위: ${Format.plain(ax.min)} ~ ${Format.plain(ax.max)}", style = T.small.copy(color = G.Sub), modifier = Modifier.padding(start = 4.dp, top = 8.dp))
+        Text(I18n.tr("지금 범위: ${Format.plain(ax.min)} ~ ${Format.plain(ax.max)}", "Current range: ${Format.plain(ax.min)} – ${Format.plain(ax.max)}", "現在の範囲: ${Format.plain(ax.min)} 〜 ${Format.plain(ax.max)}"), style = T.small.copy(color = G.Sub), modifier = Modifier.padding(start = 4.dp, top = 8.dp))
     }
     val isTime = e.table.columns.getOrNull(spec.categoryCol)?.type == ColumnType.TIME
     if (!isTime) {
         Spacer(Modifier.height(14.dp))
         PanelLabel("ORDER")
-        val sorts = listOf(SortMode.NONE to "원래 순서", SortMode.DESC to "큰 순", SortMode.ASC to "작은 순")
+        val sorts = listOf(SortMode.NONE to I18n.tr("원래 순서", "Original", "元の順"), SortMode.DESC to I18n.tr("큰 순", "Largest", "大きい順"), SortMode.ASC to I18n.tr("작은 순", "Smallest", "小さい順"))
         Segmented(sorts.map { it.second }, sorts.indexOfFirst { it.first == spec.sort }, { i -> vm.updateSpec { it.copy(sort = sorts[i].first) } },
             Modifier.fillMaxWidth(), dark = false, fill = true, itemHeight = 40.dp, background = G.Line2)
     }
     if (custom) {
         val ax = e.data.axis
         TextInputDialog(
-            "축 범위 (최솟값, 최댓값)",
+            I18n.tr("축 범위 (최솟값, 최댓값)", "Axis range (min, max)", "軸の範囲（最小, 最大）"),
             "${Format.plain(spec.axisMin ?: ax?.min ?: 0.0).replace(",", "")}, ${Format.plain(spec.axisMax ?: ax?.max ?: 100.0).replace(",", "")}",
             { custom = false },
             { t ->
                 val parts = Regex("-?\\d+(?:\\.\\d+)?").findAll(t.replace(",", " ").replace("~", " ")).mapNotNull { it.value.toDoubleOrNull() }.toList().take(2)
                 if (parts.size == 2 && parts[1] > parts[0]) vm.updateSpec { it.copy(axisMode = AxisMode.CUSTOM, axisMin = parts[0], axisMax = parts[1]) }
-                else vm.toast = "예: 0, 500 처럼 두 숫자를 적어 주세요"
+                else vm.toast = I18n.tr("예: 0, 500 처럼 두 숫자를 적어 주세요", "Enter two numbers, like 0, 500", "0, 500 のように2つの数値を入力してください")
                 custom = false
             },
             placeholder = "0, 500",
@@ -398,38 +400,38 @@ private fun LabelPanel(vm: AppViewModel) {
     var captionEdit by remember { mutableStateOf(false) }
     var sourceEdit by remember { mutableStateOf(false) }
     Row(Modifier.fillMaxWidth().heightIn(min = 52.dp).padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text("모든 값 표시", style = T.smallStrong, modifier = Modifier.weight(1f))
-        Toggle(spec.showValues, { on -> vm.updateSpec { it.copy(showValues = on) } }, "모든 값 표시")
+        Text(I18n.tr("모든 값 표시", "Show all values", "すべての値を表示"), style = T.smallStrong, modifier = Modifier.weight(1f))
+        Toggle(spec.showValues, { on -> vm.updateSpec { it.copy(showValues = on) } }, I18n.tr("모든 값 표시", "Show all values", "すべての値を表示"))
     }
     Hairline(color = G.Line2)
     Row(Modifier.fillMaxWidth().heightIn(min = 52.dp).padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text("해석 문구", style = T.smallStrong, modifier = Modifier.weight(1f))
-        Toggle(spec.showCaption, { on -> vm.updateSpec { it.copy(showCaption = on) } }, "해석 문구")
+        Text(I18n.tr("해석 문구", "Caption", "説明文"), style = T.smallStrong, modifier = Modifier.weight(1f))
+        Toggle(spec.showCaption, { on -> vm.updateSpec { it.copy(showCaption = on) } }, I18n.tr("해석 문구", "Caption", "説明文"))
     }
     Hairline(color = G.Line2)
     Row(Modifier.fillMaxWidth().heightIn(min = 52.dp).clickable { captionEdit = true }.padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
-            Text("문구 직접 쓰기", style = T.smallStrong)
-            Text(if (spec.customCaption != null) "직접 쓴 문구 사용 중" else "자동 문구 사용 중", style = T.small.copy(color = G.Sub))
+            Text(I18n.tr("문구 직접 쓰기", "Write your own caption", "説明文を自分で書く"), style = T.smallStrong)
+            Text(if (spec.customCaption != null) I18n.tr("직접 쓴 문구 사용 중", "Using your own caption", "自分で書いた説明文を使用中") else I18n.tr("자동 문구 사용 중", "Using the automatic caption", "自動の説明文を使用中"), style = T.small.copy(color = G.Sub))
         }
-        if (spec.customCaption != null) Text("자동으로", style = T.smallStrong.copy(color = G.SignalText), modifier = Modifier.clip(RoundedCornerShape(6.dp)).clickable { vm.updateSpec { it.copy(customCaption = null) } }.padding(8.dp))
+        if (spec.customCaption != null) Text(I18n.tr("자동으로", "Back to auto", "自動に戻す"), style = T.smallStrong.copy(color = G.SignalText), modifier = Modifier.clip(RoundedCornerShape(6.dp)).clickable { vm.updateSpec { it.copy(customCaption = null) } }.padding(8.dp))
         SvgIcon(Ic.Chevron, color = G.Sub, size = 14.dp)
     }
     Hairline(color = G.Line2)
     Row(Modifier.fillMaxWidth().heightIn(min = 52.dp).clickable { sourceEdit = true }.padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
-            Text("출처", style = T.smallStrong)
-            Text(spec.source ?: "예: 통계청, 매장 판매 기록", style = T.small.copy(color = G.Sub), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(I18n.tr("출처", "Source", "出典"), style = T.smallStrong)
+            Text(spec.source ?: I18n.tr("예: 통계청, 매장 판매 기록", "e.g. Statistics office, store sales records", "例: 統計局、店舗の売上記録"), style = T.small.copy(color = G.Sub), maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
         SvgIcon(Ic.Chevron, color = G.Sub, size = 14.dp)
     }
     if (captionEdit) {
         val e = vm.editor!!
-        TextInputDialog("해석 문구", spec.customCaption ?: Caption.make(e.data, spec.copy(customCaption = null)), { captionEdit = false },
+        TextInputDialog(I18n.tr("해석 문구", "Caption", "説明文"), spec.customCaption ?: Caption.make(e.data, spec.copy(customCaption = null)), { captionEdit = false },
             { t -> vm.updateSpec { it.copy(customCaption = t.trim().ifEmpty { null }) }; captionEdit = false }, singleLine = false)
     }
     if (sourceEdit) {
-        TextInputDialog("출처", spec.source ?: "", { sourceEdit = false }, { t -> vm.updateSpec { it.copy(source = t.trim().ifEmpty { null }) }; sourceEdit = false }, placeholder = "예: 통계청")
+        TextInputDialog(I18n.tr("출처", "Source", "出典"), spec.source ?: "", { sourceEdit = false }, { t -> vm.updateSpec { it.copy(source = t.trim().ifEmpty { null }) }; sourceEdit = false }, placeholder = I18n.tr("예: 통계청", "e.g. Statistics Korea", "例: 総務省統計局"))
     }
 }
 
@@ -441,7 +443,7 @@ private fun SeriesPanel(vm: AppViewModel) {
     val nums = t.numberColumns
     PanelLabel("VALUES")
     if (nums.size <= 1) {
-        Text("이 표에는 숫자 열이 하나예요: ${nums.firstOrNull()?.let { t.columns[it].displayName } ?: "-"}", style = T.small, modifier = Modifier.padding(horizontal = 4.dp))
+        Text(I18n.tr("이 표에는 숫자 열이 하나예요", "This table has one number column", "この表の数値列は1つです") + ": ${nums.firstOrNull()?.let { t.columns[it].displayName } ?: "-"}", style = T.small, modifier = Modifier.padding(horizontal = 4.dp))
     } else {
         Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             nums.forEach { c ->
@@ -454,7 +456,7 @@ private fun SeriesPanel(vm: AppViewModel) {
                 })
             }
         }
-        Text("단위가 다른 값을 함께 고르면 검사에서 알려 드려요.", style = T.small.copy(color = G.Sub), modifier = Modifier.padding(start = 4.dp, top = 10.dp))
+        Text(I18n.tr("단위가 다른 값을 함께 고르면 검사에서 알려 드려요.", "If you mix units, the check will tell you.", "単位の違う値を一緒に選ぶと、チェックでお知らせします。"), style = T.small.copy(color = G.Sub), modifier = Modifier.padding(start = 4.dp, top = 10.dp))
     }
     val cats = t.columns.indices.filter { t.columns[it].type != ColumnType.NUMBER }
     if (cats.size > 1) {

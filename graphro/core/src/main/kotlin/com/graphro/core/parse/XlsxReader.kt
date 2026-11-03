@@ -1,5 +1,7 @@
 package com.graphro.core.parse
 
+import com.graphro.core.text.I18n
+
 import org.xml.sax.Attributes
 import org.xml.sax.helpers.DefaultHandler
 import java.io.ByteArrayInputStream
@@ -20,7 +22,7 @@ object XlsxReader {
 
     fun read(bytes: ByteArray, maxRows: Int = 20_000, maxCols: Int = 200): List<RawGrid> {
         val entries = unzip(bytes)
-        val workbook = entries["xl/workbook.xml"] ?: throw XlsxException("엑셀 파일 구조를 찾을 수 없어요")
+        val workbook = entries["xl/workbook.xml"] ?: throw XlsxException(I18n.tr("엑셀 파일 구조를 찾을 수 없어요", "This doesn't look like an Excel file", "Excelファイルの構造が見つかりません"))
         val rels = entries["xl/_rels/workbook.xml.rels"]?.let { parseRels(it) } ?: emptyMap()
         val shared = entries["xl/sharedStrings.xml"]?.let { parseShared(it) } ?: emptyList()
         val styles = entries["xl/styles.xml"]?.let { parseStyles(it) } ?: Styles(emptyList(), emptyMap())
@@ -36,7 +38,7 @@ object XlsxReader {
             val grid = parseSheet(data, shared, styles, wb.date1904, maxRows, maxCols)
             if (grid.isNotEmpty()) grids.add(RawGrid(sheet.name, grid))
         }
-        if (grids.isEmpty()) throw XlsxException("내용이 있는 시트가 없어요")
+        if (grids.isEmpty()) throw XlsxException(I18n.tr("내용이 있는 시트가 없어요", "No sheet has any content", "内容のあるシートがありません"))
         return grids
     }
 
@@ -56,7 +58,7 @@ object XlsxReader {
                     val n = zin.read(chunk)
                     if (n < 0) break
                     total += n
-                    if (total > MAX_ENTRY) throw XlsxException("엑셀 파일이 너무 커요")
+                    if (total > MAX_ENTRY) throw XlsxException(I18n.tr("엑셀 파일이 너무 커요", "The Excel file is too large", "Excelファイルが大きすぎます"))
                     buf.write(chunk, 0, n)
                 }
                 out[name] = buf.toByteArray()
@@ -89,7 +91,7 @@ object XlsxReader {
                         var rid = ""
                         for (i in 0 until a.length) if (local(a.getQName(i)) == "id") rid = a.getValue(i)
                         val state = a.getValue("state") ?: ""
-                        sheets.add(SheetRef(a.getValue("name") ?: "시트", rid, state == "hidden" || state == "veryHidden"))
+                        sheets.add(SheetRef(a.getValue("name") ?: "Sheet", rid, state == "hidden" || state == "veryHidden"))
                     }
                     "workbookPr" -> d1904 = a.getValue("date1904").let { it == "1" || it == "true" }
                 }

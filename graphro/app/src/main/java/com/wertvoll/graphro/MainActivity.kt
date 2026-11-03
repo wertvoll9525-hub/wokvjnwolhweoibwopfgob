@@ -1,5 +1,7 @@
 package com.wertvoll.graphro
 
+import com.graphro.core.text.I18n
+
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -10,6 +12,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.graphro.core.text.Lang
 import com.wertvoll.graphro.ui.AppRoot
 import com.wertvoll.graphro.ui.GraphroTheme
 
@@ -19,6 +22,12 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
+        // The engine writes captions, reasons and labels in the phone's language.
+        val lang = Lang.of(resources.configuration.locales[0]?.language)
+        if (I18n.lang != lang) {
+            I18n.lang = lang
+            vm.onLanguageChanged()
+        }
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT),
             navigationBarStyle = SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT),
@@ -55,7 +64,7 @@ class MainActivity : ComponentActivity() {
                 else @Suppress("DEPRECATION") intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
                 if (stream != null) { vm.importUri(this, stream); return true }
                 val text = intent.getCharSequenceExtra(Intent.EXTRA_TEXT)?.toString()
-                if (!text.isNullOrBlank()) { vm.importText(text, "공유받은 내용"); return true }
+                if (!text.isNullOrBlank()) { vm.importText(text, I18n.tr("공유받은 내용", "Shared content", "共有された内容")); return true }
             }
             Intent.ACTION_VIEW -> {
                 val uri = intent.data

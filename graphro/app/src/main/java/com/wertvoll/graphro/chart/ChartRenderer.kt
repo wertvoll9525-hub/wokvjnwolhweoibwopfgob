@@ -1,5 +1,7 @@
 package com.wertvoll.graphro.chart
 
+import com.graphro.core.text.I18n
+
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.DashPathEffect
@@ -151,7 +153,7 @@ class ChartRenderer(private val fonts: ChartFonts, private val u: Float) {
 
     private fun drawEmpty(c: Canvas, w: Float, h: Float) {
         val p = TextPaint(catSans).apply { textAlign = Paint.Align.CENTER; color = Colors.SUB }
-        c.drawText("그릴 숫자가 없어요", w / 2, h / 2, p)
+        c.drawText(I18n.tr("그릴 숫자가 없어요", "Nothing to draw", "描く数値がありません"), w / 2, h / 2, p)
     }
 
     private fun drawLegend(c: Canvas, d: ChartData, spec: ChartSpec, w: Float) {
@@ -281,10 +283,10 @@ class ChartRenderer(private val fonts: ChartFonts, private val u: Float) {
                 c.drawText(label, r.left + dp(6f), r.centerY() + dp(3.6f), t)
             }
         }
-        spec.target?.let { line(it, "목표 ${Format.plain(it)}", Colors.INK) }
+        spec.target?.let { line(it, I18n.tr("목표 ${Format.plain(it)}", "Target ${Format.plain(it)}", "目標 ${Format.plain(it)}"), Colors.INK) }
         if (spec.showAverage) {
             val vals = d.first?.values?.filterNotNull() ?: emptyList()
-            if (vals.isNotEmpty()) line(vals.average(), "평균 ${Format.plain(vals.average())}", Colors.GRAPHITE)
+            if (vals.isNotEmpty()) line(vals.average(), I18n.tr("평균 ${Format.plain(vals.average())}", "Avg ${Format.plain(vals.average())}", "平均 ${Format.plain(vals.average())}"), Colors.GRAPHITE)
         }
     }
 

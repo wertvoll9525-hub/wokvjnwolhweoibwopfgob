@@ -1,5 +1,7 @@
 package com.wertvoll.graphro.ui
 
+import com.graphro.core.text.I18n
+
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
@@ -56,36 +58,38 @@ fun SettingsScreen(vm: AppViewModel) {
         Column(Modifier.padding(horizontal = 24.dp)) {
             Meta("SETTINGS")
             Spacer(Modifier.height(8.dp))
-            Text("설정", style = T.title)
+            Text(I18n.tr("설정", "Settings", "設定"), style = T.title)
             Spacer(Modifier.height(20.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Logo(28)
                 Spacer(Modifier.padding(start = 12.dp))
                 Column {
-                    Text("그래프로", style = T.heading)
+                    Text(I18n.tr("그래프로", "Graphro", "グラフロ"), style = T.heading)
                     Meta("VERSION ${BuildConfig.VERSION_NAME}")
                 }
             }
             Spacer(Modifier.height(16.dp))
-            Text("숫자는 지어내지 않고, 데이터는 이 폰 밖으로 나가지 않아요. 인터넷 권한도 쓰지 않아요.", style = T.small)
+            Text(I18n.tr("숫자는 지어내지 않고, 데이터는 이 폰 밖으로 나가지 않아요. 인터넷 권한도 쓰지 않아요.", "Never makes up numbers, and your data never leaves this phone. It doesn't even use the internet permission.", "数値を作り出すことはなく、データがこの端末の外に出ることもありません。インターネット権限も使いません。"), style = T.small)
             Spacer(Modifier.height(20.dp))
         }
         Hairline(Modifier.padding(horizontal = 24.dp))
-        SettingRow("개인정보처리방침", "수집하는 정보가 없어요") { vm.go(Screen.PRIVACY) }
-        SettingRow("오픈소스 라이선스", "Pretendard, IBM Plex Mono") { vm.go(Screen.LICENSES) }
-        SettingRow("문의하기", CONTACT_EMAIL) {
+        SettingRow(I18n.tr("개인정보처리방침", "Privacy policy", "プライバシーポリシー"), I18n.tr("수집하는 정보가 없어요", "We collect no data", "収集する情報はありません")) { vm.go(Screen.PRIVACY) }
+        SettingRow(I18n.tr("오픈소스 라이선스", "Open-source licenses", "オープンソースライセンス"), "Pretendard, IBM Plex Mono") { vm.go(Screen.LICENSES) }
+        SettingRow(I18n.tr("문의하기", "Contact", "お問い合わせ"), CONTACT_EMAIL) {
             val i = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:$CONTACT_EMAIL")).apply {
-                putExtra(Intent.EXTRA_SUBJECT, "[그래프로 ${BuildConfig.VERSION_NAME}] 문의")
+                putExtra(Intent.EXTRA_SUBJECT, "[Graphro ${BuildConfig.VERSION_NAME}] " + I18n.tr("문의", "Feedback", "お問い合わせ"))
             }
             try { ctx.startActivity(i) } catch (_: ActivityNotFoundException) { vm.toast = CONTACT_EMAIL }
         }
-        SettingRow("모든 차트 지우기", "저장된 작업을 모두 지워요", danger = true) { confirm = true }
+        SettingRow(I18n.tr("모든 차트 지우기", "Delete all charts", "すべてのグラフを削除"), I18n.tr("저장된 작업을 모두 지워요", "Deletes all saved work", "保存した作業をすべて削除します"), danger = true) { confirm = true }
         Spacer(Modifier.height(40.dp))
     }
-    if (confirm) ConfirmDialog("모든 차트를 지울까요?", "이 폰에 저장된 차트 ${vm.projects.size}개를 모두 지워요. 되돌릴 수 없어요.", "모두 지우기", { confirm = false }, { confirm = false; vm.deleteAll() }, danger = true)
+    if (confirm) ConfirmDialog(I18n.tr("모든 차트를 지울까요?", "Delete all charts?", "すべてのグラフを削除しますか？"), I18n.tr("이 폰에 저장된 차트 ${vm.projects.size}개를 모두 지워요. 되돌릴 수 없어요.", "This deletes all ${vm.projects.size} charts on this phone. It can't be undone.", "この端末に保存された${vm.projects.size}件のグラフをすべて削除します。元に戻せません。"), I18n.tr("모두 지우기", "Delete all", "すべて削除"), { confirm = false }, { confirm = false; vm.deleteAll() }, danger = true)
 }
 
-val PRIVACY_TEXT = """
+val PRIVACY_TEXT: String get() = I18n.tr(PRIVACY_KO, PRIVACY_EN, PRIVACY_JA)
+
+private val PRIVACY_KO = """
 그래프로(이하 ‘앱’)는 이용자의 개인정보를 수집하지 않습니다.
 
 1. 수집하는 정보
@@ -115,6 +119,66 @@ wertvoll9525@gmail.com
 시행일: 2026년 11월 3일
 """.trimIndent()
 
+private val PRIVACY_EN = """
+Graphro (“the app”) does not collect any personal information.
+
+1. Information we collect
+The app collects no personal information of any kind, including names, email addresses, phone numbers, location or device identifiers. There is no sign-up or log-in.
+
+2. How your data is handled
+Tables and files you paste or open are processed only on your device. The app does not request the internet permission, so it cannot send your data to any server. Charts you make are stored only in the app's private storage on your device and are excluded from device backups.
+
+3. Clipboard
+On the home screen the app only checks whether the clipboard contains text. It reads the content only when you tap “Create” or “From clipboard”, and never sends it off the device.
+
+4. Sharing and saving
+When you tap “Share” or “Save”, the file is passed to the app or location you choose. What happens next is governed by that app's policy.
+
+5. Ads and analytics
+The app contains no advertising, analytics or tracking tools.
+
+6. Children
+The app does not collect information from users of any age.
+
+7. Deleting data
+You can delete all stored data with “Delete all charts” in Settings, or by uninstalling the app.
+
+8. Contact
+wertvoll9525@gmail.com
+
+Effective date: November 3, 2026
+""".trimIndent()
+
+private val PRIVACY_JA = """
+グラフロ（以下「本アプリ」）は、利用者の個人情報を収集しません。
+
+1. 収集する情報
+本アプリは、氏名、メールアドレス、電話番号、位置情報、端末識別子など、いかなる個人情報も収集しません。会員登録やログインはありません。
+
+2. データの取り扱い
+利用者が貼り付けたり開いたりした表やファイルは、端末内でのみ処理されます。本アプリはインターネット権限を要求しないため、データを外部サーバーへ送信することはできません。作成したグラフは端末内のアプリ専用領域にのみ保存され、端末のバックアップにも含まれません。
+
+3. クリップボード
+ホーム画面では、クリップボードに文字があるかどうかだけを確認します。内容は利用者が「作成」または「クリップボードから」をタップしたときにのみ読み取り、端末の外へ送ることはありません。
+
+4. 共有と保存
+利用者が「共有」または「保存」をタップすると、選択したアプリや場所にファイルが渡されます。その後の取り扱いは当該アプリのポリシーに従います。
+
+5. 広告と分析
+本アプリには広告、分析、トラッキングのツールはありません。
+
+6. 児童
+本アプリは、いかなる年齢の利用者からも情報を収集しません。
+
+7. データの削除
+設定の「すべてのグラフを削除」またはアプリのアンインストールにより、保存されたデータをすべて削除できます。
+
+8. お問い合わせ
+wertvoll9525@gmail.com
+
+施行日: 2026年11月3日
+""".trimIndent()
+
 @Composable
 fun PrivacyScreen(vm: AppViewModel) {
     Column(Modifier.fillMaxSize().background(G.Paper).statusBarsPadding().navigationBarsPadding().verticalScroll(rememberScrollState())) {
@@ -122,7 +186,7 @@ fun PrivacyScreen(vm: AppViewModel) {
         Column(Modifier.padding(horizontal = 24.dp)) {
             Meta("PRIVACY")
             Spacer(Modifier.height(8.dp))
-            Text("개인정보처리방침", style = T.title)
+            Text(I18n.tr("개인정보처리방침", "Privacy policy", "プライバシーポリシー"), style = T.title)
             Spacer(Modifier.height(20.dp))
             Text(PRIVACY_TEXT, style = T.body)
             Spacer(Modifier.height(40.dp))
@@ -143,9 +207,9 @@ fun LicensesScreen(vm: AppViewModel) {
         Column(Modifier.padding(horizontal = 24.dp)) {
             Meta("LICENSES")
             Spacer(Modifier.height(8.dp))
-            Text("오픈소스 라이선스", style = T.title)
+            Text(I18n.tr("오픈소스 라이선스", "Open-source licenses", "オープンソースライセンス"), style = T.title)
             Spacer(Modifier.height(12.dp))
-            Text("앱의 차트 엔진(표 읽기, 추천, 검사, 파일 만들기)은 직접 작성했어요. 아래 글꼴은 SIL Open Font License 1.1로 제공돼요. 화면은 Android Jetpack(Apache 2.0)으로 만들었어요.", style = T.small)
+            Text(I18n.tr("앱의 차트 엔진(표 읽기, 추천, 검사, 파일 만들기)은 직접 작성했어요. 아래 글꼴은 SIL Open Font License 1.1로 제공돼요. 화면은 Android Jetpack(Apache 2.0)으로 만들었어요.", "The chart engine (reading tables, recommending, checking, creating files) is our own code. The fonts below are provided under the SIL Open Font License 1.1. The UI is built with Android Jetpack (Apache 2.0).", "グラフエンジン（表の読み取り、推薦、チェック、ファイル作成）は独自に作成しました。以下のフォントは SIL Open Font License 1.1 で提供されています。画面は Android Jetpack（Apache 2.0）で作りました。"), style = T.small)
             texts.forEach { (name, text) ->
                 Spacer(Modifier.height(24.dp))
                 Text(name, style = T.heading)

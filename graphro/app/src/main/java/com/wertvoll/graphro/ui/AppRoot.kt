@@ -1,5 +1,7 @@
 package com.wertvoll.graphro.ui
 
+import com.graphro.core.text.I18n
+
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -80,7 +82,7 @@ fun AppRoot(vm: AppViewModel, playIntro: Boolean) {
                 ) {
                     CircularProgressIndicator(Modifier.size(16.dp), color = G.Paper, strokeWidth = 2.dp)
                     Spacer(Modifier.width(10.dp))
-                    Text("표를 읽고 있어요", style = T.smallStrong.copy(color = G.Paper))
+                    Text(I18n.tr("표를 읽고 있어요", "Reading the table", "表を読み取っています"), style = T.smallStrong.copy(color = G.Paper))
                 }
             }
         }
@@ -110,7 +112,7 @@ fun IntroSplash(onDone: () -> Unit) {
         delay(420)
         onDone()
     }
-    Box(Modifier.fillMaxSize().background(G.Paper).semantics { contentDescription = "그래프로" }, contentAlignment = Alignment.Center) {
+    Box(Modifier.fillMaxSize().background(G.Paper).semantics { contentDescription = I18n.tr("그래프로", "Graphro", "グラフロ") }, contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Row(Modifier.height(104.dp), verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Bar(52, G.Ink, b1.value)
@@ -122,9 +124,9 @@ fun IntroSplash(onDone: () -> Unit) {
                 Modifier.graphicsLayer { alpha = word.value; translationY = (1f - word.value) * 10.dp.toPx() },
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Text("그래프로", style = T.title.copy(fontSize = 26.sp))
+                Text(I18n.tr("그래프로", "Graphro", "グラフロ"), style = T.title.copy(fontSize = 26.sp))
                 Spacer(Modifier.height(6.dp))
-                Text("틀리지 않는 차트", style = T.small.copy(fontSize = 14.sp))
+                Text(I18n.tr("틀리지 않는 차트", "Honest charts", "まちがえないグラフ"), style = T.small.copy(fontSize = 14.sp))
             }
         }
         Box(Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = 40.dp).graphicsLayer { alpha = word.value }) {

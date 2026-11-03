@@ -15,6 +15,7 @@ object Caption {
 
     fun make(d: ChartData, spec: ChartSpec): String {
         spec.customCaption?.takeIf { it.isNotBlank() }?.let { return it }
+        if (I18n.lang != Lang.KO) return ForeignCaption.make(d, spec)
         val s = d.first ?: return ""
         val vals = s.values
         if (vals.none { it != null }) return ""
@@ -50,7 +51,7 @@ object Caption {
         return if (consecutive(a, b)) b.previousWord() else "이전 시점"
     }
 
-    private fun consecutive(a: TimePoint, b: TimePoint): Boolean {
+    internal fun consecutive(a: TimePoint, b: TimePoint): Boolean {
         if (a.granularity != b.granularity) return false
         val ya = a.year ?: 0; val yb = b.year ?: 0
         return when (a.granularity) {

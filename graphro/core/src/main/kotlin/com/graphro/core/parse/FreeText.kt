@@ -1,5 +1,7 @@
 package com.graphro.core.parse
 
+import com.graphro.core.text.I18n
+
 /**
  * Turns loosely written lines into a table:
  *   "1월 매출 320만, 방문 1,240명 / 2월 280만원 1105명 ..."
@@ -8,8 +10,8 @@ package com.graphro.core.parse
  */
 object FreeText {
 
-    private val NUMBER_TOKEN = Regex("[△▽▼+\\-−]?\\(?[₩$]?\\d[\\d,]*(?:\\.\\d+)?\\)?(?:\\s*[천백십])?(?:\\s*[조억만])?(?:(?<=[조억만])\\s*\\d[\\d,]*(?:\\.\\d+)?\\s*(?:[천백십]\\s*[조억만]?|[조억만]))*(?:%p|%|\\s?원|[가-힣A-Za-z㎡]{0,4})")
-    private val PERIOD_TOKEN = Regex("(\\d{4}\\s*년\\s*\\d{1,2}\\s*월|\\d{2,4}\\s*년\\s*[1-4]\\s*분기|\\d{4}\\s*년(?:도)?|\\d{1,2}\\s*월|[1-4]\\s*분기|상반기|하반기|\\d{4}[-./]\\d{1,2}(?:[-./]\\d{1,2})?)")
+    private val NUMBER_TOKEN = Regex("[△▽▼+\\-−]?\\(?[₩$]?\\d[\\d,]*(?:\\.\\d+)?\\)?(?:\\s*[천백십千百])?(?:\\s*[조억만兆億万])?(?:(?<=[조억만兆億万])\\s*\\d[\\d,]*(?:\\.\\d+)?\\s*(?:[천백십千百]\\s*[조억만兆億万]?|[조억만兆億万]))*(?:%p|%|\\s?원|円|[가-힣\\u3040-\\u30FF\\u4E00-\\u9FFFA-Za-z㎡]{0,4})")
+    private val PERIOD_TOKEN = Regex("(\\d{4}\\s*年\\s*\\d{1,2}\\s*月|\\d{1,2}\\s*月|第?[1-4]\\s*四半期|\\d{4}\\s*年(?:度)?|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\\.?(?:\\s+\\d{4})?|Q[1-4](?:\\s+\\d{4})?|\\d{4}\\s*년\\s*\\d{1,2}\\s*월|\\d{2,4}\\s*년\\s*[1-4]\\s*분기|\\d{4}\\s*년(?:도)?|\\d{1,2}\\s*월|[1-4]\\s*분기|상반기|하반기|\\d{4}[-./]\\d{1,2}(?:[-./]\\d{1,2})?)")
 
     data class Record(val label: String, val pairs: List<Pair<String?, String>>)
 
@@ -24,7 +26,7 @@ object FreeText {
             if (periods.size >= 2 && periods.first().range.first <= 2) {
                 for ((i, m) in periods.withIndex()) {
                     val end = if (i + 1 < periods.size) periods[i + 1].range.first else line.length
-                    segments.add(line.substring(m.range.first, end).trim().trimEnd(',', '/', ';', '·'))
+                    segments.add(line.substring(m.range.first, end).trim().trimEnd(',', '/', ';', '·', '、'))
                 }
             } else segments.add(line)
         }
@@ -43,21 +45,21 @@ object FreeText {
             words.groupingBy { it }.eachCount().maxByOrNull { it.value }?.key
                 ?: records.mapNotNull { r -> r.pairs.getOrNull(p)?.second?.let { KoreanNumber.parse(it)?.unit } }
                     .groupingBy { it }.eachCount().maxByOrNull { it.value }?.key?.let { unitName(it) }
-                ?: if (mode == 1) "값" else "값 ${p + 1}"
+                ?: if (mode == 1) I18n.value() else I18n.valueN(p + 1)
         }.let { n -> n.mapIndexed { i, s -> if (n.count { it == s } > 1) "$s ${i + 1}" else s } }
 
         val labelIsPeriod = records.all { TimeParser.parse(it.label) != null }
-        val header = listOf(if (labelIsPeriod) "기간" else "항목") + names
+        val header = listOf(if (labelIsPeriod) I18n.period() else I18n.item()) + names
         val rows = records.map { r -> listOf(r.label) + (0 until mode).map { p -> r.pairs.getOrNull(p)?.second ?: "" } }
-        return RawGrid("문장", rows.let { listOf(header) + it })
+        return RawGrid(I18n.tr("문장", "Text", "文章"), rows.let { listOf(header) + it })
     }
 
     private fun unitName(u: String) = when (u) {
-        "원", "만원", "천원" -> "금액"
-        "명" -> "인원"
-        "%" -> "비율"
-        "개" -> "개수"
-        "건" -> "건수"
+        "원", "만원", "천원", "円", "$" -> I18n.tr("금액", "Amount", "金額")
+        "명", "人" -> I18n.tr("인원", "People", "人数")
+        "%" -> I18n.tr("비율", "Share", "割合")
+        "개", "個" -> I18n.tr("개수", "Count", "個数")
+        "건", "件" -> I18n.tr("건수", "Cases", "件数")
         else -> u
     }
 
@@ -82,12 +84,12 @@ object FreeText {
         val pairs = ArrayList<Pair<String?, String>>()
         var pos = 0
         for (m in NUMBER_TOKEN.findAll(s)) {
-            val token = m.value.trim().trimEnd(',', '/', ';')
+            val token = m.value.trim().trimEnd(',', '/', ';', '、')
             if (KoreanNumber.parse(token) == null) continue
             val before = s.substring(pos, m.range.first)
-                .replace(Regex("[,/;:：=·()]"), " ").trim()
+                .replace(Regex("[,/;:：=·()、。]"), " ").trim()
                 .split(Regex("\\s+")).lastOrNull { it.isNotEmpty() && it.any { ch -> ch.isLetter() } }
-                ?.removeSuffix("은")?.removeSuffix("는")?.removeSuffix("이")?.removeSuffix("가")
+                ?.removeSuffix("은")?.removeSuffix("는")?.removeSuffix("이")?.removeSuffix("가")?.removeSuffix("は")?.removeSuffix("が")?.removeSuffix("の")
             pairs.add(before to token)
             pos = m.range.last + 1
         }

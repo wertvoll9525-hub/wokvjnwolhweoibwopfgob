@@ -40,15 +40,27 @@ object Format {
         return if (values.isNotEmpty() && values.maxOf { abs(it) } >= 100) 1 else 2
     }
 
-    /** Value with its unit for sentences: "410만 원", "1,240명", "12.5%". */
+    /** Value with its unit for sentences: "410만 원", "410万円", "$4.1M", "1,240명", "12.5%". */
     fun withUnit(scaledValue: Double, scaleLabel: String, unit: String?, decimals: Int = -1): String {
         val n = if (decimals >= 0) fixed(scaledValue, decimals, trim = true) else plain(scaledValue)
         val u = unit ?: ""
-        return when {
-            scaleLabel.isEmpty() && u.isEmpty() -> n
-            scaleLabel.isEmpty() -> if (u == "%" || u == "%p" || u.length == 1 || isTightUnit(u)) "$n$u" else "$n $u"
-            u.isEmpty() -> "$n$scaleLabel"
-            else -> "$n$scaleLabel $u"
+        return when (I18n.lang) {
+            Lang.JA -> n + scaleLabel + u
+            Lang.EN -> {
+                val core = n + scaleLabel
+                when {
+                    u.isEmpty() -> core
+                    u == "$" || u == "€" || u == "£" -> if (core.startsWith("-")) "-$u${core.drop(1)}" else "$u$core"
+                    u == "%" || u == "%p" -> core + u
+                    else -> "$core $u"
+                }
+            }
+            Lang.KO -> when {
+                scaleLabel.isEmpty() && u.isEmpty() -> n
+                scaleLabel.isEmpty() -> if (u == "%" || u == "%p" || u.length == 1 || isTightUnit(u)) "$n$u" else "$n $u"
+                u.isEmpty() -> "$n$scaleLabel"
+                else -> "$n$scaleLabel $u"
+            }
         }
     }
 

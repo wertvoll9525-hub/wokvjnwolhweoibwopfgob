@@ -64,7 +64,7 @@ object XlsxWriter {
             "<Relationship Id=\"rId2\" Type=\"http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties\" Target=\"docProps/core.xml\"/>" +
             "<Relationship Id=\"rId3\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties\" Target=\"docProps/app.xml\"/>" +
             "</Relationships>")
-        z.add("docProps/core.xml", Xml.HEAD + "<cp:coreProperties xmlns:cp=\"http://schemas.openxmlformats.org/package/2006/metadata/core-properties\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:dcterms=\"http://purl.org/dc/terms/\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"><dc:creator>그래프로</dc:creator></cp:coreProperties>")
+        z.add("docProps/core.xml", Xml.HEAD + "<cp:coreProperties xmlns:cp=\"http://schemas.openxmlformats.org/package/2006/metadata/core-properties\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:dcterms=\"http://purl.org/dc/terms/\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"><dc:creator>Graphro</dc:creator></cp:coreProperties>")
         z.add("docProps/app.xml", Xml.HEAD + "<Properties xmlns=\"http://schemas.openxmlformats.org/officeDocument/2006/extended-properties\"><Application>Graphro</Application></Properties>")
         z.add("xl/workbook.xml", Xml.HEAD + buildString {
             append("<workbook xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\"><sheets>")
@@ -79,7 +79,7 @@ object XlsxWriter {
         })
         z.add("xl/styles.xml", Xml.HEAD + "<styleSheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\">" +
             "<numFmts count=\"1\"><numFmt numFmtId=\"164\" formatCode=\"#,##0.##\"/></numFmts>" +
-            "<fonts count=\"2\"><font><sz val=\"11\"/><name val=\"맑은 고딕\"/><family val=\"2\"/></font><font><b/><sz val=\"11\"/><name val=\"맑은 고딕\"/><family val=\"2\"/></font></fonts>" +
+            "<fonts count=\"2\"><font><sz val=\"11\"/><name val=\"${Xml.esc(com.graphro.core.text.I18n.officeFont)}\"/><family val=\"2\"/></font><font><b/><sz val=\"11\"/><name val=\"${Xml.esc(com.graphro.core.text.I18n.officeFont)}\"/><family val=\"2\"/></font></fonts>" +
             "<fills count=\"2\"><fill><patternFill patternType=\"none\"/></fill><fill><patternFill patternType=\"gray125\"/></fill></fills>" +
             "<borders count=\"1\"><border><left/><right/><top/><bottom/><diagonal/></border></borders>" +
             "<cellStyleXfs count=\"1\"><xf numFmtId=\"0\" fontId=\"0\" fillId=\"0\" borderId=\"0\"/></cellStyleXfs>" +

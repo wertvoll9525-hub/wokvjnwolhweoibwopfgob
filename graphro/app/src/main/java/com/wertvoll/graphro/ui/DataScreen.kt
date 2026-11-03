@@ -1,5 +1,7 @@
 package com.wertvoll.graphro.ui
 
+import com.graphro.core.text.I18n
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -54,9 +56,9 @@ private fun shown(c: DataColumn, r: Int): String = when (val v = c.cells[r].valu
 }
 
 private fun typeLabel(c: DataColumn): String = when (c.type) {
-    ColumnType.TIME -> "기간"
-    ColumnType.NUMBER -> if (c.unitLabel.isNotEmpty()) "숫자 · ${c.unitLabel}" else "숫자"
-    ColumnType.TEXT -> "항목"
+    ColumnType.TIME -> I18n.tr("기간", "Period", "期間")
+    ColumnType.NUMBER -> if (c.unitLabel.isNotEmpty()) I18n.tr("숫자 · ${c.unitLabel}", "Number · ${c.unitLabel}", "数値 · ${c.unitLabel}") else I18n.tr("숫자", "Number", "数値")
+    ColumnType.TEXT -> I18n.tr("항목", "Item", "項目")
 }
 
 @Composable
@@ -74,13 +76,13 @@ fun DataScreen(vm: AppViewModel) {
 
     Column(Modifier.fillMaxSize().background(G.Paper).statusBarsPadding().navigationBarsPadding()) {
         TopBar(onBack = { vm.cancelImport() }, close = s.editingProjectId == null) {
-            IconAction(Ic.Swap, "행과 열 바꾸기", { vm.transpose(); vm.toast = "행과 열을 바꿨어요" })
+            IconAction(Ic.Swap, I18n.tr("행과 열 바꾸기", "Swap rows and columns", "行と列を入れ替え"), { vm.transpose(); vm.toast = I18n.tr("행과 열을 바꿨어요", "Swapped rows and columns", "行と列を入れ替えました") })
         }
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
             Column(Modifier.padding(horizontal = 24.dp)) {
-                Meta(if (s.editingProjectId != null) "DATA · ${s.origin.ifBlank { "표" }}" else "STEP 1 / 2 · DATA")
+                Meta(if (s.editingProjectId != null) "DATA · ${s.origin.ifBlank { I18n.tr("표", "Table", "表") }}" else "STEP 1 / 2 · DATA")
                 Spacer(Modifier.height(8.dp))
-                Text("표를 이렇게\n읽었어요", style = T.title)
+                Text(I18n.tr("표를 이렇게\n읽었어요", "Here's how we\nread your table", "表をこのように\n読み取りました"), style = T.title)
             }
             if (s.candidates.size > 1) {
                 Row(
@@ -88,17 +90,17 @@ fun DataScreen(vm: AppViewModel) {
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
                     s.candidates.forEachIndexed { i, c ->
-                        Chip("표 ${i + 1} · ${c.label}".take(24), i == s.selected, { vm.selectCandidate(i) })
+                        Chip(I18n.tr("표 ${i + 1} · ${c.label}", "Table ${i + 1} · ${c.label}", "表${i + 1} · ${c.label}").take(24), i == s.selected, { vm.selectCandidate(i) })
                     }
                 }
             }
             Row(Modifier.fillMaxWidth().padding(start = 24.dp, end = 24.dp, top = 18.dp), verticalAlignment = Alignment.CenterVertically) {
                 Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                     Text("${t.rowCount} × ${t.columns.size}", style = T.mono.copy(fontSize = T.meta.fontSize * 1.1f, color = G.Body))
-                    if (fixes.isNotEmpty()) Text("● 고침 ${fixes.size}", style = T.mono.copy(fontSize = T.meta.fontSize * 1.1f, color = G.SignalText))
-                    if (t.excludedRows.isNotEmpty()) Text("— 제외 ${t.excludedRows.size}", style = T.mono.copy(fontSize = T.meta.fontSize * 1.1f, color = G.Body))
+                    if (fixes.isNotEmpty()) Text(I18n.tr("● 고침 ${fixes.size}", "● fixed ${fixes.size}", "● 修正 ${fixes.size}"), style = T.mono.copy(fontSize = T.meta.fontSize * 1.1f, color = G.SignalText))
+                    if (t.excludedRows.isNotEmpty()) Text(I18n.tr("— 제외 ${t.excludedRows.size}", "— excluded ${t.excludedRows.size}", "— 除外 ${t.excludedRows.size}"), style = T.mono.copy(fontSize = T.meta.fontSize * 1.1f, color = G.Body))
                 }
-                Segmented(listOf("표", "원문"), view, { view = it })
+                Segmented(listOf(I18n.tr("표", "Table", "表"), I18n.tr("원문", "Original", "原文")), view, { view = it })
             }
             Spacer(Modifier.height(14.dp))
             if (view == 0) {
@@ -106,17 +108,17 @@ fun DataScreen(vm: AppViewModel) {
                     val fi = fixes.indexOfFirst { it.row == r && it.column == c }
                     if (fi >= 0) sel = fi else editing = r to c
                 }, onHeader = { renaming = it }, onInclude = { vm.includeRow(it) })
-                if (t.rowCount > MAX_ROWS) Text("처음 ${MAX_ROWS}행만 보여요. 차트에는 모두 들어가요.", style = T.small.copy(color = G.Sub), modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp))
-                Text("칸을 누르면 고칠 수 있고, 열 이름을 누르면 이름을 바꿀 수 있어요.", style = T.small.copy(color = G.Sub), modifier = Modifier.padding(horizontal = 24.dp, vertical = 10.dp))
+                if (t.rowCount > MAX_ROWS) Text(I18n.tr("처음 ${MAX_ROWS}행만 보여요. 차트에는 모두 들어가요.", "Showing the first ${MAX_ROWS} rows. The chart uses all of them.", "最初の${MAX_ROWS}行のみ表示しています。グラフにはすべて含まれます。"), style = T.small.copy(color = G.Sub), modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp))
+                Text(I18n.tr("칸을 누르면 고칠 수 있고, 열 이름을 누르면 이름을 바꿀 수 있어요.", "Tap a cell to edit it, or a column name to rename it.", "セルをタップすると編集、列名をタップすると名前を変更できます。"), style = T.small.copy(color = G.Sub), modifier = Modifier.padding(horizontal = 24.dp, vertical = 10.dp))
             } else {
                 RawView(s.rawText, s.source.header, s.source.rows)
             }
             if (t.report.isNotEmpty() || t.title != null || t.notes.isNotEmpty()) {
                 Column(Modifier.padding(horizontal = 24.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Meta("WHAT THE APP DID")
-                    t.title?.let { Text("제목: $it", style = T.small) }
+                    t.title?.let { Text(I18n.tr("제목: $it", "Title: $it", "タイトル: $it"), style = T.small) }
                     t.report.distinct().forEach { Text("· $it", style = T.small) }
-                    t.notes.forEach { Text("· 메모: $it", style = T.small) }
+                    t.notes.forEach { Text(I18n.tr("· 메모: $it", "· Note: $it", "· 注記: $it"), style = T.small) }
                 }
             }
             Spacer(Modifier.height(12.dp))
@@ -124,7 +126,7 @@ fun DataScreen(vm: AppViewModel) {
 
         if (selFix != null) {
             val col = t.columns[selFix.column]
-            val revertible = selFix.message.startsWith("단위가 빠져") || selFix.message.startsWith("빈 칸이라")
+            val revertible = col.cells[selFix.row].revertible
             Column(
                 Modifier.padding(horizontal = 16.dp).fillMaxWidth().clip(RoundedCornerShape(22.dp)).background(G.Ink)
                     .padding(start = 20.dp, end = 16.dp, top = 16.dp, bottom = 16.dp),
@@ -134,17 +136,17 @@ fun DataScreen(vm: AppViewModel) {
                     Meta("${shownLabel(t, selFix.row)} · ${col.name}", color = G.Fog2, modifier = Modifier.weight(1f))
                     Meta("${sel + 1} / ${fixes.size}", color = G.Fog2)
                 }
-                Text("“${col.cells[selFix.row].raw}” → ${shown(col, selFix.row).ifEmpty { "빈 칸" }}", style = T.heading.copy(color = G.Paper), maxLines = 2, overflow = TextOverflow.Ellipsis)
+                Text("“${col.cells[selFix.row].raw}” → ${shown(col, selFix.row).ifEmpty { I18n.tr("빈 칸", "empty", "空欄") }}", style = T.heading.copy(color = G.Paper), maxLines = 2, overflow = TextOverflow.Ellipsis)
                 Text(selFix.message, style = T.small.copy(color = G.Fog2))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    if (revertible) DarkPill("원래대로", outline = true) { vm.keepRaw(selFix.row, selFix.column) }
-                    DarkPill("직접 고치기", outline = true) { editing = selFix.row to selFix.column }
-                    if (fixes.size > 1) DarkPill("확인, 다음", outline = false) { sel = (sel + 1) % fixes.size }
+                    if (revertible) DarkPill(I18n.tr("원래대로", "Undo fix", "元に戻す"), outline = true) { vm.keepRaw(selFix.row, selFix.column) }
+                    DarkPill(I18n.tr("직접 고치기", "Edit", "直接編集"), outline = true) { editing = selFix.row to selFix.column }
+                    if (fixes.size > 1) DarkPill(I18n.tr("확인, 다음", "OK, next", "OK、次へ"), outline = false) { sel = (sel + 1) % fixes.size }
                 }
             }
         }
         Pill(
-            if (s.editingProjectId != null) "이 표로 다시 그리기" else "차트 만들기",
+            if (s.editingProjectId != null) I18n.tr("이 표로 다시 그리기", "Redraw with this table", "この表で描き直す") else I18n.tr("차트 만들기", "Make chart", "グラフを作成"),
             { vm.confirmData() },
             Modifier.fillMaxWidth().padding(16.dp),
             kind = PillKind.Signal, trailingArrow = true, enabled = numCols > 0,
@@ -157,17 +159,17 @@ fun DataScreen(vm: AppViewModel) {
             t.columns.getOrNull(c)?.cells?.getOrNull(r)?.raw ?: "",
             { editing = null },
             { vm.editCell(r, c, it); editing = null },
-            placeholder = "값을 입력하세요",
+            placeholder = I18n.tr("값을 입력하세요", "Enter a value", "値を入力してください"),
         )
     }
     renaming?.let { c ->
-        TextInputDialog("열 이름", s.source.header.getOrElse(c) { t.columns[c].name }, { renaming = null }, { vm.renameColumn(c, it); renaming = null })
+        TextInputDialog(I18n.tr("열 이름", "Column name", "列名"), s.source.header.getOrElse(c) { t.columns[c].name }, { renaming = null }, { vm.renameColumn(c, it); renaming = null })
     }
 }
 
 private fun shownLabel(t: DataTable, r: Int): String {
     val label = t.columns.firstOrNull { it.type != ColumnType.NUMBER }?.let { c -> shown(c, r).ifEmpty { c.cells[r].raw } }
-    return label?.takeIf { it.isNotBlank() } ?: "${r + 1}행"
+    return label?.takeIf { it.isNotBlank() } ?: I18n.tr("${r + 1}행", "Row ${r + 1}", "${r + 1}行目")
 }
 
 @Composable
@@ -236,7 +238,7 @@ private fun DataGrid(t: DataTable, selected: Pair<Int, Int>?, onCell: (Int, Int)
                 Row(Modifier.fillMaxWidth().padding(bottom = 6.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text(t.excludedRows[r] ?: "", style = T.small.copy(color = G.Sub), modifier = Modifier.weight(1f, fill = false))
                     Spacer(Modifier.width(8.dp))
-                    Text("포함하기", style = T.smallStrong.copy(textDecoration = TextDecoration.Underline), modifier = Modifier.clip(RoundedCornerShape(6.dp)).clickable { onInclude(r) }.padding(6.dp))
+                    Text(I18n.tr("포함하기", "Include", "含める"), style = T.smallStrong.copy(textDecoration = TextDecoration.Underline), modifier = Modifier.clip(RoundedCornerShape(6.dp)).clickable { onInclude(r) }.padding(6.dp))
                 }
             }
             Hairline()

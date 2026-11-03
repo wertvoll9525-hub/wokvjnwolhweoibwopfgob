@@ -1,5 +1,7 @@
 package com.wertvoll.graphro
 
+import com.graphro.core.text.I18n
+
 import android.app.Application
 import android.content.ClipboardManager
 import android.content.Context
@@ -57,7 +59,11 @@ data class EditorSession(
     val data: ChartData by lazy { ChartData.build(table, project.spec) }
 }
 
-const val SAMPLE = "월\t매출\t방문자(명)\n1월\t320만\t1,240\n2월\t280만원\t1,105\n3월\t410만\t1,630\n4월\t395\t1,580\n5월\t452만\t1,712\n6월\t4,380,000원\t1,690\n합계\t2,295만\t8,957"
+val SAMPLE: String get() = I18n.tr(
+    "월\t매출\t방문자(명)\n1월\t320만\t1,240\n2월\t280만원\t1,105\n3월\t410만\t1,630\n4월\t395\t1,580\n5월\t452만\t1,712\n6월\t4,380,000원\t1,690\n합계\t2,295만\t8,957",
+    "Month\tRevenue\tVisitors\nJan\t$320K\t1,240\nFeb\t$280,000\t1,105\nMar\t$410K\t1,630\nApr\t395\t1,580\nMay\t$452K\t1,712\nJun\t$438K\t1,690\nTotal\t$2,295K\t8,957",
+    "月\t売上\t来店数(人)\n1月\t320万\t1,240\n2月\t280万円\t1,105\n3月\t410万\t1,630\n4月\t395\t1,580\n5月\t452万\t1,712\n6月\t4,380,000円\t1,690\n合計\t2,295万\t8,957",
+)
 
 class AppViewModel(app: Application) : AndroidViewModel(app) {
     private val store = ProjectStore(app)
@@ -107,6 +113,18 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
+    /** Rebuild tables so their notes, units and labels follow the new language. */
+    fun onLanguageChanged() {
+        refreshProjects()
+        editor = editor?.let { e -> e.copy(table = TableBuilder.build(e.project.source)) }
+        importSession = importSession?.let { s ->
+            s.copy(
+                candidates = s.candidates.map { c -> c.copy(table = TableBuilder.build(c.source)) },
+                table = TableBuilder.build(s.source),
+            )
+        }
+    }
+
     fun checkClipboard(ctx: Context) {
         val cm = ctx.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager ?: return
         // Only the description is read here, so no clipboard-access notice is shown.
@@ -129,7 +147,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch {
             val r = withContext(Dispatchers.Default) { runCatching { Importer.fromText(text) }.getOrNull() }
             busy = false
-            if (r == null || r.candidates.isEmpty()) { toast = r?.error ?: "표를 찾지 못했어요"; return@launch }
+            if (r == null || r.candidates.isEmpty()) { toast = r?.error ?: I18n.tr("표를 찾지 못했어요", "Couldn't find a table", "表が見つかりませんでした"); return@launch }
             startReview(r.candidates, text, origin)
         }
     }
@@ -143,10 +161,10 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                     val name = ctx.contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME, OpenableColumns.SIZE), null, null, null)?.use { c ->
                         if (c.moveToFirst()) {
                             val size = c.getLong(1)
-                            if (size > Importer.MAX_BYTES) return@runCatching Triple(null, "파일이 너무 커요 (30MB까지)", "")
+                            if (size > Importer.MAX_BYTES) return@runCatching Triple(null, I18n.tr("파일이 너무 커요 (30MB까지)", "The file is too large (up to 30 MB)", "ファイルが大きすぎます（30MBまで）"), "")
                             c.getString(0)
                         } else null
-                    } ?: uri.lastPathSegment ?: "파일"
+                    } ?: uri.lastPathSegment ?: I18n.tr("파일", "File", "ファイル")
                     val bytes = ctx.contentResolver.openInputStream(uri)?.use { input ->
                         val out = java.io.ByteArrayOutputStream()
                         val buf = ByteArray(64 * 1024)
@@ -154,20 +172,20 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                         while (true) {
                             val n = input.read(buf); if (n < 0) break
                             total += n
-                            if (total > Importer.MAX_BYTES) return@runCatching Triple(null, "파일이 너무 커요 (30MB까지)", name)
+                            if (total > Importer.MAX_BYTES) return@runCatching Triple(null, I18n.tr("파일이 너무 커요 (30MB까지)", "The file is too large (up to 30 MB)", "ファイルが大きすぎます（30MBまで）"), name)
                             out.write(buf, 0, n)
                         }
                         out.toByteArray()
-                    } ?: return@runCatching Triple(null, "파일을 열 수 없어요", name)
+                    } ?: return@runCatching Triple(null, I18n.tr("파일을 열 수 없어요", "Can't open the file", "ファイルを開けません"), name)
                     val r = Importer.fromFile(name, bytes)
                     val isText = !(bytes.size > 2 && bytes[0] == 'P'.code.toByte() && bytes[1] == 'K'.code.toByte())
                     val raw = if (isText && bytes.size < 2_000_000) TextDecode.decode(bytes) else null
                     Triple(r to raw, r.error, name)
-                }.getOrElse { Triple(null, "파일을 읽는 중 문제가 생겼어요", "") }
+                }.getOrElse { Triple(null, I18n.tr("파일을 읽는 중 문제가 생겼어요", "Something went wrong while reading the file", "ファイルの読み込み中に問題が発生しました"), "") }
             }
             busy = false
             val (pair, error, name) = result
-            if (pair == null || pair.first.candidates.isEmpty()) { toast = error ?: "표를 찾지 못했어요"; return@launch }
+            if (pair == null || pair.first.candidates.isEmpty()) { toast = error ?: I18n.tr("표를 찾지 못했어요", "Couldn't find a table", "表が見つかりませんでした"); return@launch }
             startReview(pair.first.candidates, pair.second, name)
         }
     }
@@ -203,7 +221,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     /** Create the chart (or apply the reviewed data back to the project being edited). */
     fun confirmData() {
         val s = importSession ?: return
-        if (s.table.numberColumns.isEmpty()) { toast = "숫자 열이 없어서 차트를 그릴 수 없어요"; return }
+        if (s.table.numberColumns.isEmpty()) { toast = I18n.tr("숫자 열이 없어서 차트를 그릴 수 없어요", "There is no number column to chart", "数値の列がないためグラフを描けません"); return }
         val existing = s.editingProjectId?.let { id -> editor?.project?.takeIf { it.id == id } }
         val now = System.currentTimeMillis()
         if (existing != null) {
@@ -258,7 +276,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     fun delete(item: ProjectItem) {
         store.delete(item.project.id)
         projects = projects.filterNot { it.project.id == item.project.id }
-        toast = "삭제했어요"
+        toast = I18n.tr("삭제했어요", "Deleted", "削除しました")
     }
 
     fun rename(item: ProjectItem, name: String) {
@@ -269,20 +287,20 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     fun duplicate(item: ProjectItem) {
         val now = System.currentTimeMillis()
-        val p = item.project.copy(id = UUID.randomUUID().toString(), name = item.project.name + " 사본", spec = item.project.spec.copy(title = item.project.spec.title + " 사본"), createdAt = now, updatedAt = now)
+        val p = item.project.copy(id = UUID.randomUUID().toString(), name = item.project.name + I18n.tr(" 사본", " copy", "のコピー"), spec = item.project.spec.copy(title = item.project.spec.title + I18n.tr(" 사본", " copy", "のコピー")), createdAt = now, updatedAt = now)
         store.save(p)
         refreshProjects()
-        toast = "사본을 만들었어요"
+        toast = I18n.tr("사본을 만들었어요", "Duplicated", "複製しました")
     }
 
     fun deleteAll() {
         store.deleteAll()
         projects = emptyList()
         editor = null
-        toast = "모든 작업을 지웠어요"
+        toast = I18n.tr("모든 작업을 지웠어요", "All work deleted", "すべて削除しました")
     }
 
-    fun sample() = importText(SAMPLE, "예제")
+    fun sample() = importText(SAMPLE, I18n.tr("예제", "Sample", "サンプル"))
 
     // ---------- editor ----------
 

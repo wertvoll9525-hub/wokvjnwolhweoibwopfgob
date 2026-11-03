@@ -9,7 +9,20 @@ import com.graphro.core.model.TimePoint
  */
 object TimeParser {
 
-    private val WEEKDAY_SUFFIX = Regex("\\s*\\((월|화|수|목|금|토|일)(요일)?\\)$")
+    private val WEEKDAY_SUFFIX = Regex("\\s*[\\(（](월|화|수|목|금|토|일|月|火|水|木|金|土|日)(요일|曜日)?[\\)）]$|\\s*\\((Mon|Tue|Wed|Thu|Fri|Sat|Sun)[a-z]*\\)$")
+
+    /** Japanese and English period words rewritten into the Korean forms parsed below. */
+    private fun normalizeForeign(s0: String): String {
+        var s = s0
+        if (s.any { it in "年月日期度半四" }) {
+            s = s.replace("年度", "년").replace("年", "년").replace("月", "월").replace("日", "일")
+            s = s.replace(Regex("第\\s*([1-4])\\s*四半期"), "$1분기").replace(Regex("([1-4])\\s*四半期"), "$1분기")
+            s = s.replace(Regex("上半期|上期"), "상반기").replace(Regex("下半期|下期"), "하반기")
+        }
+        s = s.replace(Regex("^FY\\s?(\\d{4})$", RegexOption.IGNORE_CASE), "$1년")
+        s = s.replace(Regex("^(\\d{4})\\s*(H|h)([12])$"), "$1 $2$3").replace(Regex("^(H|h)([12])\\s*(\\d{4})$"), "$3 H$2")
+        return s
+    }
 
     private val DAY_ISO = Regex("^(\\d{4})\\s*[-./]\\s*(\\d{1,2})\\s*[-./]\\s*(\\d{1,2})\\.?(?:[ T]\\d{1,2}:\\d{2}(?::\\d{2}(?:\\.\\d+)?)?(?:Z|[+-]\\d{2}:?\\d{2})?)?$")
     private val DAY_KO = Regex("^(\\d{4})\\s*년\\s*(\\d{1,2})\\s*월\\s*(\\d{1,2})\\s*일$")
@@ -41,6 +54,7 @@ object TimeParser {
         if (s.isEmpty() || s.length > 40) return null
         s = s.replace(WEEKDAY_SUFFIX, "").trim()
         s = s.replace(Regex("\\s+"), " ")
+        s = normalizeForeign(s)
 
         DAY_ISO.matchEntire(s)?.let { m -> return day(m.groupValues[1].toInt(), m.groupValues[2].toInt(), m.groupValues[3].toInt()) }
         DAY_KO.matchEntire(s)?.let { m -> return day(m.groupValues[1].toInt(), m.groupValues[2].toInt(), m.groupValues[3].toInt()) }

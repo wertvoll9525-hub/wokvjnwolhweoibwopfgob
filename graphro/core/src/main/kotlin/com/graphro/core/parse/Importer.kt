@@ -1,12 +1,14 @@
 package com.graphro.core.parse
 
+import com.graphro.core.text.I18n
+
 import com.graphro.core.json.Json
 import com.graphro.core.model.ColumnType
 import com.graphro.core.model.DataTable
 
 /** One table found in an input, with where it came from. */
 data class Candidate(val sheet: String, val source: TableSource, val table: DataTable, val score: Double) {
-    val label: String get() = listOfNotNull(sheet.takeIf { it.isNotBlank() }, source.title).joinToString(" · ").ifEmpty { "표" }
+    val label: String get() = listOfNotNull(sheet.takeIf { it.isNotBlank() }, source.title).joinToString(" · ").ifEmpty { I18n.tr("표", "Table", "表") }
 }
 
 data class ImportResult(val candidates: List<Candidate>, val error: String? = null) {
@@ -19,7 +21,7 @@ object Importer {
 
     fun fromText(text: String, name: String = ""): ImportResult {
         val t = text.removePrefix("﻿")
-        if (t.isBlank()) return ImportResult(emptyList(), "붙여넣은 내용이 비어 있어요")
+        if (t.isBlank()) return ImportResult(emptyList(), I18n.tr("붙여넣은 내용이 비어 있어요", "Nothing was pasted", "貼り付けた内容が空です"))
         val trimmed = t.trim()
         if (trimmed.startsWith("[") || trimmed.startsWith("{")) {
             runCatching { fromJson(trimmed, name) }.getOrNull()?.let { if (it.candidates.isNotEmpty()) return it }
@@ -30,37 +32,37 @@ object Importer {
         val asText = FreeText.parse(t)?.let { grid -> candidatesFrom(grid.copy(name = name)).map { it.copy(score = it.score - 0.02) } }.orEmpty()
             .filter { it.table.rowCount > 0 && it.table.columns.isNotEmpty() }
         val good = if ((asText.maxOfOrNull { it.score } ?: -1.0) > (asGrid.maxOfOrNull { it.score } ?: -1.0)) asText else asGrid
-        if (good.isEmpty()) return ImportResult(emptyList(), "표 모양을 찾지 못했어요. 엑셀에서 표를 복사하거나 ‘항목 숫자’처럼 줄마다 적어 주세요")
+        if (good.isEmpty()) return ImportResult(emptyList(), I18n.tr("표 모양을 찾지 못했어요. 엑셀에서 표를 복사하거나 ‘항목 숫자’처럼 줄마다 적어 주세요", "Couldn't find a table. Copy a table from a spreadsheet, or write one item and number per line", "表が見つかりませんでした。表計算ソフトから表をコピーするか、1行に「項目 数値」の形で書いてください"))
         return ImportResult(dedupe(good))
     }
 
     fun fromFile(fileName: String, bytes: ByteArray): ImportResult {
-        if (bytes.size > MAX_BYTES) return ImportResult(emptyList(), "파일이 너무 커요 (30MB까지)")
+        if (bytes.size > MAX_BYTES) return ImportResult(emptyList(), I18n.tr("파일이 너무 커요 (30MB까지)", "The file is too large (up to 30 MB)", "ファイルが大きすぎます（30MBまで）"))
         val lower = fileName.lowercase()
         val isZip = bytes.size > 4 && bytes[0] == 'P'.code.toByte() && bytes[1] == 'K'.code.toByte()
         val isOle = bytes.size > 8 && bytes[0] == 0xD0.toByte() && bytes[1] == 0xCF.toByte() && bytes[2] == 0x11.toByte() && bytes[3] == 0xE0.toByte()
         return try {
             when {
                 isOle || lower.endsWith(".xls") && !isZip ->
-                    ImportResult(emptyList(), "엑셀 97-2003(.xls) 파일은 아직 열 수 없어요. 엑셀에서 ‘다른 이름으로 저장 → .xlsx’ 후 다시 열어 주세요")
+                    ImportResult(emptyList(), I18n.tr("엑셀 97-2003(.xls) 파일은 아직 열 수 없어요. 엑셀에서 ‘다른 이름으로 저장 → .xlsx’ 후 다시 열어 주세요", "Excel 97-2003 (.xls) files aren't supported yet. Save as .xlsx in Excel and open it again", "Excel 97-2003（.xls）ファイルはまだ開けません。Excelで.xlsxとして保存してから開いてください"))
                 lower.endsWith(".hwp") || lower.endsWith(".hwpx") ->
-                    ImportResult(emptyList(), "한글 문서는 바로 열 수 없어요. 문서에서 표를 복사해 붙여넣어 주세요")
+                    ImportResult(emptyList(), I18n.tr("한글 문서는 바로 열 수 없어요. 문서에서 표를 복사해 붙여넣어 주세요", "Hangul (.hwp) files can't be opened directly. Copy the table and paste it instead", "HWPファイルは直接開けません。表をコピーして貼り付けてください"))
                 isZip && (lower.endsWith(".xlsx") || lower.endsWith(".xlsm") || !lower.contains('.') || lower.endsWith(".xltx")) -> fromXlsx(bytes)
-                isZip -> runCatching { fromXlsx(bytes) }.getOrElse { ImportResult(emptyList(), "이 압축 파일 형식은 열 수 없어요") }
+                isZip -> runCatching { fromXlsx(bytes) }.getOrElse { ImportResult(emptyList(), I18n.tr("이 압축 파일 형식은 열 수 없어요", "This archive format can't be opened", "この圧縮ファイル形式は開けません")) }
                 lower.endsWith(".json") -> fromJson(TextDecode.decode(bytes), fileName)
                 else -> fromText(TextDecode.decode(bytes), fileName.substringBeforeLast('.'))
             }
         } catch (e: XlsxReader.XlsxException) {
             ImportResult(emptyList(), e.message)
         } catch (e: Exception) {
-            ImportResult(emptyList(), "파일을 읽는 중 문제가 생겼어요")
+            ImportResult(emptyList(), I18n.tr("파일을 읽는 중 문제가 생겼어요", "Something went wrong while reading the file", "ファイルの読み込み中に問題が発生しました"))
         }
     }
 
     private fun fromXlsx(bytes: ByteArray): ImportResult {
         val grids = XlsxReader.read(bytes)
         val out = grids.flatMap { candidatesFrom(it) }
-        if (out.isEmpty()) return ImportResult(emptyList(), "시트에서 표를 찾지 못했어요")
+        if (out.isEmpty()) return ImportResult(emptyList(), I18n.tr("시트에서 표를 찾지 못했어요", "No table was found in the sheets", "シートに表が見つかりませんでした"))
         return ImportResult(out)
     }
 
@@ -80,7 +82,7 @@ object Importer {
             }
             else -> emptyList()
         }
-        if (rows.isEmpty()) return ImportResult(emptyList(), "JSON에서 표를 찾지 못했어요")
+        if (rows.isEmpty()) return ImportResult(emptyList(), I18n.tr("JSON에서 표를 찾지 못했어요", "No table was found in the JSON", "JSONに表が見つかりませんでした"))
         val keys = LinkedHashSet<String>()
         rows.forEach { r -> r.keys.forEach { keys.add(it.toString()) } }
         val header = keys.toList()
@@ -111,9 +113,9 @@ object Importer {
         if (num.isEmpty()) return 0.05
         val label = t.columns.any { it.type != ColumnType.NUMBER }
         val cells = num.sumOf { it.cells.size }
-        val bad = num.sumOf { c -> c.cells.count { it.fix?.startsWith("숫자로 읽을 수 없") == true } }
+        val bad = num.sumOf { c -> c.cells.count { it.value is com.graphro.core.model.Value.Empty && it.fix != null } }
         val clean = 1.0 - bad.toDouble() / cells
-        val emptyNames = t.columns.count { it.name.startsWith("열 ") || it.name.startsWith("값 ") }
+        val emptyNames = t.columns.count { I18n.isGenericName(it.name) && it.name !in I18n.periodNames && it.name !in I18n.itemNames }
         var s = 0.55 * clean + (if (label) 0.25 else 0.0) + 0.1 * minOf(1.0, t.rowCount / 4.0) + 0.1 * minOf(1.0, num.size / 2.0)
         s -= 0.03 * emptyNames
         // Many text columns that look like split sentences are a bad sign.

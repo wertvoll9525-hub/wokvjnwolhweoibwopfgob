@@ -1,5 +1,7 @@
 package com.wertvoll.graphro.ui
 
+import com.graphro.core.text.I18n
+
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Canvas
@@ -68,9 +70,9 @@ fun relativeDate(t: Long): String {
     val now = Calendar.getInstance()
     val c = Calendar.getInstance().apply { timeInMillis = t }
     val sameDay = now.get(Calendar.YEAR) == c.get(Calendar.YEAR) && now.get(Calendar.DAY_OF_YEAR) == c.get(Calendar.DAY_OF_YEAR)
-    if (sameDay) return "오늘"
+    if (sameDay) return I18n.tr("오늘", "Today", "今日")
     now.add(Calendar.DAY_OF_YEAR, -1)
-    if (now.get(Calendar.YEAR) == c.get(Calendar.YEAR) && now.get(Calendar.DAY_OF_YEAR) == c.get(Calendar.DAY_OF_YEAR)) return "어제"
+    if (now.get(Calendar.YEAR) == c.get(Calendar.YEAR) && now.get(Calendar.DAY_OF_YEAR) == c.get(Calendar.DAY_OF_YEAR)) return I18n.tr("어제", "Yesterday", "昨日")
     return SimpleDateFormat("MM.dd", Locale.KOREA).format(Date(t))
 }
 
@@ -89,16 +91,16 @@ fun HomeScreen(vm: AppViewModel) {
             Row(Modifier.fillMaxWidth().height(56.dp).padding(start = 24.dp, end = 10.dp), verticalAlignment = Alignment.CenterVertically) {
                 Logo()
                 Spacer(Modifier.width(8.dp))
-                Text("그래프로", style = T.heading.copy(letterSpacing = androidx.compose.ui.unit.TextUnit.Unspecified))
+                Text(I18n.tr("그래프로", "Graphro", "グラフロ"), style = T.heading.copy(letterSpacing = androidx.compose.ui.unit.TextUnit.Unspecified))
                 Spacer(Modifier.weight(1f))
-                IconAction(Ic.Menu, "설정", { vm.go(Screen.SETTINGS) })
+                IconAction(Ic.Menu, I18n.tr("설정", "Settings", "設定"), { vm.go(Screen.SETTINGS) })
             }
         }
         item {
             Column(Modifier.padding(start = 24.dp, end = 24.dp, top = 24.dp)) {
                 Meta(today)
                 Spacer(Modifier.height(10.dp))
-                Text("무엇을\n그려볼까요", style = T.display)
+                Text(I18n.tr("무엇을\n그려볼까요", "What shall\nwe chart?", "何を\nグラフにしますか"), style = T.display)
             }
         }
         item {
@@ -106,9 +108,9 @@ fun HomeScreen(vm: AppViewModel) {
         }
         item {
             Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Pill("붙여넣기", { vm.go(Screen.PASTE) }, Modifier.weight(1f), kind = PillKind.Outline, height = 48.dp, textStyle = T.smallStrong)
-                Pill("파일 열기", { picker.launch(OPEN_TYPES) }, Modifier.weight(1f), kind = PillKind.Outline, height = 48.dp, textStyle = T.smallStrong)
-                Pill("예제", { vm.sample() }, Modifier.weight(1f), kind = PillKind.Outline, height = 48.dp, textStyle = T.smallStrong)
+                Pill(I18n.tr("붙여넣기", "Paste", "貼り付け"), { vm.go(Screen.PASTE) }, Modifier.weight(1f), kind = PillKind.Outline, height = 48.dp, textStyle = T.smallStrong)
+                Pill(I18n.tr("파일 열기", "Open file", "ファイルを開く"), { picker.launch(OPEN_TYPES) }, Modifier.weight(1f), kind = PillKind.Outline, height = 48.dp, textStyle = T.smallStrong)
+                Pill(I18n.tr("예제", "Sample", "サンプル"), { vm.sample() }, Modifier.weight(1f), kind = PillKind.Outline, height = 48.dp, textStyle = T.smallStrong)
             }
         }
         item {
@@ -116,7 +118,7 @@ fun HomeScreen(vm: AppViewModel) {
                 Meta("RECENT")
                 Spacer(Modifier.weight(1f))
                 if (vm.projects.size > recent.size) {
-                    Text("모두 보기", style = T.small, modifier = Modifier.clip(RoundedCornerShape(8.dp)).clickable { vm.go(Screen.PROJECTS) }.padding(8.dp))
+                    Text(I18n.tr("모두 보기", "See all", "すべて見る"), style = T.small, modifier = Modifier.clip(RoundedCornerShape(8.dp)).clickable { vm.go(Screen.PROJECTS) }.padding(8.dp))
                 }
             }
         }
@@ -125,12 +127,12 @@ fun HomeScreen(vm: AppViewModel) {
                 Column(Modifier.padding(horizontal = 24.dp, vertical = 12.dp)) {
                     Hairline()
                     Spacer(Modifier.height(16.dp))
-                    Text("아직 만든 차트가 없어요. 엑셀에서 표를 복사하거나 파일을 열어 시작해 보세요.", style = T.small)
+                    Text(I18n.tr("아직 만든 차트가 없어요. 엑셀에서 표를 복사하거나 파일을 열어 시작해 보세요.", "No charts yet. Copy a table from a spreadsheet or open a file to start.", "まだグラフがありません。表をコピーするかファイルを開いて始めましょう。"), style = T.small)
                     Spacer(Modifier.height(16.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         SvgIcon(Ic.Lock, color = G.Sub, size = 14.dp, stroke = 1.8f)
                         Spacer(Modifier.width(6.dp))
-                        Text("모든 데이터는 이 폰 안에서만 처리돼요", style = T.small.copy(color = G.Sub))
+                        Text(I18n.tr("모든 데이터는 이 폰 안에서만 처리돼요", "All data stays on this phone", "データはすべてこの端末内で処理されます"), style = T.small.copy(color = G.Sub))
                     }
                 }
             }
@@ -160,7 +162,7 @@ private fun StartCard(vm: AppViewModel) {
             .clickable {
                 if (hasClip) {
                     val text = vm.readClipboard(ctx)
-                    if (text.isNullOrBlank()) vm.toast = "복사한 내용이 비어 있어요" else vm.importText(text, "복사한 내용")
+                    if (text.isNullOrBlank()) vm.toast = I18n.tr("복사한 내용이 비어 있어요", "The clipboard is empty", "コピーした内容が空です") else vm.importText(text, I18n.tr("복사한 내용", "Copied content", "コピーした内容"))
                 } else vm.sample()
             }
             .padding(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 18.dp),
@@ -174,16 +176,16 @@ private fun StartCard(vm: AppViewModel) {
         SampleSpark(Modifier.fillMaxWidth().height(88.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                Text(if (hasClip) "방금 복사한 내용" else "예제로 먼저 해보기", style = T.heading)
+                Text(if (hasClip) I18n.tr("방금 복사한 내용", "What you just copied", "コピーした内容") else I18n.tr("예제로 먼저 해보기", "Try a sample first", "まずはサンプルで試す"), style = T.heading)
                 Spacer(Modifier.height(3.dp))
-                Text(if (hasClip) "표·숫자를 읽어서 차트로 만들어요" else "섞인 단위와 합계 행을 어떻게 읽는지 보세요", style = T.small, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(if (hasClip) I18n.tr("표·숫자를 읽어서 차트로 만들어요", "Turns tables and numbers into a chart", "表や数値を読み取ってグラフにします") else I18n.tr("섞인 단위와 합계 행을 어떻게 읽는지 보세요", "See how mixed units and totals are handled", "混在した単位や合計行の扱いを見てみましょう"), style = T.small, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
             Spacer(Modifier.width(12.dp))
             Row(
                 Modifier.height(44.dp).clip(RoundedCornerShape(50)).background(G.Ink).padding(horizontal = 18.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text("만들기", style = T.button.copy(color = G.Paper))
+                Text(I18n.tr("만들기", "Create", "作成"), style = T.button.copy(color = G.Paper))
                 Spacer(Modifier.width(6.dp))
                 SvgIcon(Ic.Arrow, color = G.Paper, size = 16.dp, stroke = 2f)
             }
@@ -253,17 +255,17 @@ fun ProjectRow(vm: AppViewModel, item: ProjectItem, index: Int, modifier: Modifi
             Spacer(Modifier.width(8.dp))
             MiniSpark(item.data, Modifier.size(width = 64.dp, height = 28.dp))
             Box {
-                IconAction(Ic.More, "더 보기", { menu = true }, color = G.Sub)
+                IconAction(Ic.More, I18n.tr("더 보기", "More", "その他"), { menu = true }, color = G.Sub)
                 DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                    DropdownMenuItem(text = { Text("이름 바꾸기", style = T.bodyStrong) }, onClick = { menu = false; rename = true })
-                    DropdownMenuItem(text = { Text("사본 만들기", style = T.bodyStrong) }, onClick = { menu = false; vm.duplicate(item) })
-                    DropdownMenuItem(text = { Text("삭제", style = T.bodyStrong.copy(color = G.SignalText)) }, onClick = { menu = false; confirmDelete = true })
+                    DropdownMenuItem(text = { Text(I18n.tr("이름 바꾸기", "Rename", "名前を変更"), style = T.bodyStrong) }, onClick = { menu = false; rename = true })
+                    DropdownMenuItem(text = { Text(I18n.tr("사본 만들기", "Duplicate", "複製"), style = T.bodyStrong) }, onClick = { menu = false; vm.duplicate(item) })
+                    DropdownMenuItem(text = { Text(I18n.tr("삭제", "Delete", "削除"), style = T.bodyStrong.copy(color = G.SignalText)) }, onClick = { menu = false; confirmDelete = true })
                 }
             }
         }
     }
-    if (rename) TextInputDialog("이름 바꾸기", item.project.spec.title, { rename = false }, { vm.rename(item, it.trim().ifEmpty { item.project.spec.title }); rename = false })
-    if (confirmDelete) ConfirmDialog("차트를 삭제할까요?", "‘${item.project.spec.title}’을(를) 지우면 되돌릴 수 없어요.", "삭제", { confirmDelete = false }, { confirmDelete = false; vm.delete(item) }, danger = true)
+    if (rename) TextInputDialog(I18n.tr("이름 바꾸기", "Rename", "名前を変更"), item.project.spec.title, { rename = false }, { vm.rename(item, it.trim().ifEmpty { item.project.spec.title }); rename = false })
+    if (confirmDelete) ConfirmDialog(I18n.tr("차트를 삭제할까요?", "Delete this chart?", "グラフを削除しますか？"), I18n.tr("‘${item.project.spec.title}’을(를) 지우면 되돌릴 수 없어요.", "Deleting “${item.project.spec.title}” can't be undone.", "「${item.project.spec.title}」を削除すると元に戻せません。"), I18n.tr("삭제", "Delete", "削除"), { confirmDelete = false }, { confirmDelete = false; vm.delete(item) }, danger = true)
 }
 
 @Composable
@@ -273,7 +275,7 @@ fun ProjectsScreen(vm: AppViewModel) {
         Column(Modifier.padding(horizontal = 24.dp)) {
             Meta("ALL CHARTS · ${vm.projects.size}")
             Spacer(Modifier.height(8.dp))
-            Text("모든 차트", style = T.title)
+            Text(I18n.tr("모든 차트", "All charts", "すべてのグラフ"), style = T.title)
             Spacer(Modifier.height(12.dp))
         }
         LazyColumn(contentPadding = PaddingValues(bottom = 40.dp)) {
@@ -287,7 +289,7 @@ fun ProjectsScreen(vm: AppViewModel) {
 @Composable
 fun TopBar(onBack: () -> Unit, close: Boolean = false, actions: @Composable () -> Unit = {}) {
     Row(Modifier.fillMaxWidth().height(56.dp).padding(start = 6.dp, end = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-        IconAction(if (close) Ic.Close else Ic.Back, if (close) "닫기" else "뒤로", onBack)
+        IconAction(if (close) Ic.Close else Ic.Back, if (close) I18n.tr("닫기", "Close", "閉じる") else I18n.tr("뒤로", "Back", "戻る"), onBack)
         Spacer(Modifier.weight(1f))
         actions()
     }
@@ -301,7 +303,7 @@ fun PasteScreen(vm: AppViewModel) {
         Column(Modifier.padding(horizontal = 24.dp)) {
             Meta("PASTE")
             Spacer(Modifier.height(8.dp))
-            Text("표나 숫자를\n붙여넣으세요", style = T.title)
+            Text(I18n.tr("표나 숫자를\n붙여넣으세요", "Paste a table\nor numbers", "表や数値を\n貼り付けてください"), style = T.title)
         }
         Box(
             Modifier.padding(start = 16.dp, end = 16.dp, top = 20.dp).fillMaxWidth().weight(1f)
@@ -309,7 +311,7 @@ fun PasteScreen(vm: AppViewModel) {
         ) {
             if (vm.pasteDraft.isEmpty()) {
                 Text(
-                    "엑셀·한글·웹에서 복사한 표, CSV, 또는\n\n1월 매출 320만, 방문 1,240명\n2월 매출 280만원, 방문 1,105명\n\n처럼 줄마다 적어도 괜찮아요.",
+                    I18n.tr("엑셀·한글·웹에서 복사한 표, CSV, 또는\n\n1월 매출 320만, 방문 1,240명\n2월 매출 280만원, 방문 1,105명\n\n처럼 줄마다 적어도 괜찮아요.", "A table copied from a spreadsheet or the web, CSV, or lines like\n\nJan revenue $320K, visitors 1,240\nFeb revenue $280,000, visitors 1,105\n\nall work.", "表計算ソフトやWebからコピーした表、CSV、または\n\n1月 売上 320万、来店 1,240人\n2月 売上 280万円、来店 1,105人\n\nのように1行ずつ書いてもOKです。"),
                     style = T.mono.copy(color = G.Faint, fontSize = androidx.compose.ui.unit.TextUnit.Unspecified),
                 )
             }
@@ -322,15 +324,15 @@ fun PasteScreen(vm: AppViewModel) {
             )
         }
         Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Pill("클립보드에서", {
+            Pill(I18n.tr("클립보드에서", "From clipboard", "クリップボードから"), {
                 val t = vm.readClipboard(ctx)
-                if (t.isNullOrBlank()) vm.toast = "복사한 내용이 없어요" else vm.pasteDraft = t
+                if (t.isNullOrBlank()) vm.toast = I18n.tr("복사한 내용이 없어요", "Nothing has been copied", "コピーした内容がありません") else vm.pasteDraft = t
             }, Modifier.weight(1f), kind = PillKind.Outline, height = 44.dp, textStyle = T.smallStrong)
-            Pill("예제 넣기", { vm.pasteDraft = SAMPLE }, Modifier.weight(1f), kind = PillKind.Outline, height = 44.dp, textStyle = T.smallStrong)
-            if (vm.pasteDraft.isNotEmpty()) Pill("지우기", { vm.pasteDraft = "" }, kind = PillKind.Outline, height = 44.dp, textStyle = T.smallStrong)
+            Pill(I18n.tr("예제 넣기", "Insert sample", "サンプルを入れる"), { vm.pasteDraft = SAMPLE }, Modifier.weight(1f), kind = PillKind.Outline, height = 44.dp, textStyle = T.smallStrong)
+            if (vm.pasteDraft.isNotEmpty()) Pill(I18n.tr("지우기", "Clear", "消去"), { vm.pasteDraft = "" }, kind = PillKind.Outline, height = 44.dp, textStyle = T.smallStrong)
         }
         Pill(
-            "표로 읽기", { vm.importText(vm.pasteDraft, "붙여넣기") },
+            I18n.tr("표로 읽기", "Read as table", "表として読む"), { vm.importText(vm.pasteDraft, I18n.tr("붙여넣기", "Paste", "貼り付け")) },
             Modifier.fillMaxWidth().padding(16.dp).widthIn(max = 640.dp),
             kind = PillKind.Signal, enabled = vm.pasteDraft.isNotBlank(), trailingArrow = true,
         )

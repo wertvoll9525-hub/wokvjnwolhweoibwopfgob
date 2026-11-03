@@ -7,19 +7,40 @@ import com.graphro.core.model.Scale
 import com.graphro.core.model.TimePoint
 import com.graphro.core.model.Value
 import com.graphro.core.text.Format
+import com.graphro.core.text.I18n
 import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.log10
 import kotlin.math.pow
 
-enum class ChartType(val label: String, val short: String, val code: String) {
-    LINE("선 그래프", "선", "LINE"),
-    BAR("막대 그래프", "막대", "BAR"),
-    STACKED("누적 막대", "누적", "STACK"),
-    HBAR("가로 막대", "가로", "H-BAR"),
-    AREA("영역 그래프", "영역", "AREA"),
-    DONUT("도넛 그래프", "도넛", "DONUT");
+enum class ChartType(val code: String) {
+    LINE("LINE"),
+    BAR("BAR"),
+    STACKED("STACK"),
+    HBAR("H-BAR"),
+    AREA("AREA"),
+    DONUT("DONUT");
+
+    val label: String
+        get() = when (this) {
+            LINE -> I18n.tr("선 그래프", "Line chart", "折れ線グラフ")
+            BAR -> I18n.tr("막대 그래프", "Bar chart", "棒グラフ")
+            STACKED -> I18n.tr("누적 막대", "Stacked bars", "積み上げ棒")
+            HBAR -> I18n.tr("가로 막대", "Horizontal bars", "横棒グラフ")
+            AREA -> I18n.tr("영역 그래프", "Area chart", "面グラフ")
+            DONUT -> I18n.tr("도넛 그래프", "Donut chart", "ドーナツグラフ")
+        }
+
+    val short: String
+        get() = when (this) {
+            LINE -> I18n.tr("선", "Line", "折れ線")
+            BAR -> I18n.tr("막대", "Bar", "棒")
+            STACKED -> I18n.tr("누적", "Stack", "積上")
+            HBAR -> I18n.tr("가로", "H-bar", "横棒")
+            AREA -> I18n.tr("영역", "Area", "面")
+            DONUT -> I18n.tr("도넛", "Donut", "ドーナツ")
+        }
 
     val hasValueAxis: Boolean get() = this != DONUT
     val barLike: Boolean get() = this == BAR || this == STACKED || this == HBAR
@@ -139,9 +160,9 @@ data class ChartData(
             }
             val full = rows.map { r ->
                 when {
-                    catCol == null -> "${r + 1}번째"
+                    catCol == null -> I18n.tr("${r + 1}번째", "#${r + 1}", "${r + 1}番目")
                     isTime -> tp(r)?.fullLabel() ?: catCol.cells[r].raw
-                    else -> catCol.cells[r].raw.ifEmpty { "${r + 1}번째" }
+                    else -> catCol.cells[r].raw.ifEmpty { I18n.tr("${r + 1}번째", "#${r + 1}", "${r + 1}番目") }
                 }
             }
             val series = seriesCols.map { c ->

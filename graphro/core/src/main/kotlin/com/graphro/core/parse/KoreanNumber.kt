@@ -21,6 +21,7 @@ object KoreanNumber {
     private val EMPTY_TOKENS = setOf(
         "-", "–", "—", "−", "…", "...", "·", "x", "X", "n/a", "N/A", "NA", "na", "null", "NULL",
         "해당없음", "해당 없음", "없음", "미상", "자료없음", "비공개", "#N/A", "#DIV/0!", "#VALUE!", "#REF!", "#NAME?", "#NUM!",
+        "―", "－", "…", "該当なし", "なし", "不明", "n.a.", "N.A.", "—", "x", "*",
     )
 
     fun isEmptyToken(s: String): Boolean {
@@ -28,30 +29,31 @@ object KoreanNumber {
         return t.isEmpty() || t in EMPTY_TOKENS
     }
 
-    private const val BIG_UNITS = "조억만"
-    private const val SMALL_UNITS = "천백십"
+    private const val BIG_UNITS = "조억만兆億万"
+    private const val SMALL_UNITS = "천백십千百"
 
     private fun bigOf(c: Char): Double = when (c) {
-        '조' -> 1e12
-        '억' -> 1e8
-        '만' -> 1e4
+        '조', '兆' -> 1e12
+        '억', '億' -> 1e8
+        '만', '万' -> 1e4
         else -> 1.0
     }
 
     private fun smallOf(c: Char): Double = when (c) {
-        '천' -> 1e3
-        '백' -> 1e2
+        '천', '千' -> 1e3
+        '백', '百' -> 1e2
         '십' -> 1e1
         else -> 1.0
     }
 
-    private val UNIT_RE = Regex("^[A-Za-z가-힣㎡㎢㎏㎞㎜㎝㎖㎗ℓ%‰℃°/·]{1,8}$")
+    private val UNIT_RE = Regex("^[A-Za-z가-힣\\u3040-\\u30FF\\u4E00-\\u9FFF㎡㎢㎏㎞㎜㎝㎖㎗ℓ%‰℃°/·.]{1,10}$")
     private val THOUSANDS_RE = Regex("^\\d{1,3}(,\\d{3})+(\\.\\d+)?$")
 
     private val UNIT_ALIASES = mapOf(
         "퍼센트" to "%", "프로" to "%", "pct" to "%",
         "원정" to "원", "원화" to "원", "krw" to "원", "KRW" to "원",
-        "usd" to "달러", "USD" to "달러",
+        "usd" to "$", "USD" to "$", "dollars" to "$", "달러" to "$", "ドル" to "$", "엔" to "円", "yen" to "円",
+        "percent" to "%", "pts" to "%p", "pt" to "%p", "ポイント" to "%p", "%포인트" to "%p",
     )
 
     fun parse(input: String): Parsed? {
@@ -89,10 +91,10 @@ object KoreanNumber {
         if (s.isNotEmpty()) {
             val cur = when (s[0]) {
                 '₩', '￦' -> "원"
-                '$' -> "달러"
+                '$' -> "$"
                 '€' -> "유로"
                 '£' -> "파운드"
-                '¥' -> "엔"
+                '¥', '￥' -> "円"
                 else -> null
             }
             if (cur != null) { unit = cur; s = s.substring(1).trim() }
@@ -138,6 +140,7 @@ object KoreanNumber {
                 ) {
                     suffixMult = when (s[i]) { 'k', 'K' -> 1e3; 'M' -> 1e6; else -> 1e9 }
                     hadMagnitude = true
+                    if (bigFactor == null || suffixMult > bigFactor) bigFactor = suffixMult
                     i++
                 }
                 skipSpaces()

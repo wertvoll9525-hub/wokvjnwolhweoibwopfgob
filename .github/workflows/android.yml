@@ -90,6 +90,10 @@ jobs:
 
   smoke:
     needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        lang: [ko, en, ja]
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 40
@@ -113,16 +117,16 @@ jobs:
           profile: pixel_6
           disable-animations: false
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          script: adb install -r out/app/build/outputs/apk/debug/app-debug.apk && bash graphro/tools/smoke.sh graphro/dist/ci/screens
+          script: adb install -r out/app/build/outputs/apk/debug/app-debug.apk && bash graphro/tools/smoke.sh graphro/dist/ci/screens/${{ matrix.lang }} ${{ matrix.lang }}
       - name: Save screenshots to the branch
         if: always()
         run: |
-          [ -d graphro/dist/ci/screens ] || exit 0
+          [ -d graphro/dist/ci/screens/${{ matrix.lang }} ] || exit 0
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f graphro/dist/ci/screens
-          git commit -m "에뮬레이터 실행 화면 (${GITHUB_SHA::7}) [skip ci]" || exit 0
-          for i in 1 2 3; do
+          git add -f graphro/dist/ci/screens/${{ matrix.lang }}
+          git commit -m "에뮬레이터 실행 화면 ${{ matrix.lang }} (${GITHUB_SHA::7}) [skip ci]" || exit 0
+          for i in 1 2 3 4 5 6; do
             git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" && break
             sleep 5
           done

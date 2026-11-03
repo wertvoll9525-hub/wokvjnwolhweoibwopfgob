@@ -1,5 +1,7 @@
 package com.wertvoll.graphro.ui
 
+import com.graphro.core.text.I18n
+
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
@@ -171,7 +173,7 @@ fun Segmented(
             if (fill) m = Modifier.weight(1f).then(m)
             Box(
                 m.clickable(role = Role.Tab) { onSelect(i) }
-                    .semantics { stateDescription = if (on) "선택됨" else "" }
+                    .semantics { stateDescription = if (on) I18n.tr("선택됨", "Selected", "選択中") else "" }
                     .padding(horizontal = 13.dp),
                 contentAlignment = Alignment.Center,
             ) {
@@ -190,7 +192,7 @@ fun Toggle(checked: Boolean, onChange: (Boolean) -> Unit, label: String, modifie
             .clip(RoundedCornerShape(50))
             .background(if (checked) G.Ink else G.Fog2)
             .clickable(role = Role.Switch) { onChange(!checked) }
-            .semantics { contentDescription = label; stateDescription = if (checked) "켜짐" else "꺼짐" }
+            .semantics { contentDescription = label; stateDescription = if (checked) I18n.tr("켜짐", "On", "オン") else I18n.tr("꺼짐", "Off", "オフ") }
             .padding(3.dp),
     ) {
         Box(Modifier.offset(x = x).size(22.dp).clip(CircleShape).background(G.Paper))
@@ -266,7 +268,7 @@ fun TextInputDialog(
     placeholder: String = "",
     keyboard: KeyboardType = KeyboardType.Text,
     singleLine: Boolean = true,
-    confirmLabel: String = "확인",
+    confirmLabel: String = I18n.tr("확인", "OK", "OK"),
 ) {
     // Start with the old value selected so typing replaces it.
     var text by remember { mutableStateOf(androidx.compose.ui.text.input.TextFieldValue(initial, androidx.compose.ui.text.TextRange(0, initial.length))) }
@@ -290,7 +292,7 @@ fun TextInputDialog(
                 )
             }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Pill("취소", onDismiss, Modifier.weight(1f), kind = PillKind.Outline, height = 48.dp)
+                Pill(I18n.tr("취소", "Cancel", "キャンセル"), onDismiss, Modifier.weight(1f), kind = PillKind.Outline, height = 48.dp)
                 Pill(confirmLabel, { onConfirm(text.text) }, Modifier.weight(1f), kind = PillKind.Ink, height = 48.dp)
             }
         }
@@ -309,7 +311,7 @@ fun ConfirmDialog(title: String, body: String, confirm: String, onDismiss: () ->
             Text(body, style = T.body)
             Spacer(Modifier.height(4.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Pill("취소", onDismiss, Modifier.weight(1f), kind = PillKind.Outline, height = 48.dp)
+                Pill(I18n.tr("취소", "Cancel", "キャンセル"), onDismiss, Modifier.weight(1f), kind = PillKind.Outline, height = 48.dp)
                 Pill(confirm, onConfirm, Modifier.weight(1f), kind = if (danger) PillKind.Signal else PillKind.Ink, height = 48.dp)
             }
         }
@@ -343,7 +345,7 @@ fun Chip(text: String, selected: Boolean, onClick: () -> Unit, modifier: Modifie
             .background(if (selected) G.Ink else G.Paper)
             .border(BorderStroke(1.dp, if (selected) G.Ink else G.Fog), RoundedCornerShape(50))
             .clickable(role = Role.Checkbox, onClick = onClick)
-            .semantics { stateDescription = if (selected) "선택됨" else "선택 안 됨" }
+            .semantics { stateDescription = if (selected) I18n.tr("선택됨", "Selected", "選択中") else I18n.tr("선택 안 됨", "Not selected", "未選択") }
             .padding(horizontal = 14.dp),
         contentAlignment = Alignment.Center,
     ) {

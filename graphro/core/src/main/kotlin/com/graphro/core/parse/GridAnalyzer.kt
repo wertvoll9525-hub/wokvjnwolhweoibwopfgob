@@ -1,5 +1,7 @@
 package com.graphro.core.parse
 
+import com.graphro.core.text.I18n
+
 /**
  * Finds tables inside a raw grid: splits blocks separated by blank rows/columns, peels off
  * title and note lines, finds (possibly multi-line) headers and turns sideways time tables
@@ -7,7 +9,7 @@ package com.graphro.core.parse
  */
 object GridAnalyzer {
 
-    private val NOTE_PREFIX = Regex("^(출처|자료|주\\s*[:：)]|주\\d|※|\\*|비고|참고|source|note|notes)", RegexOption.IGNORE_CASE)
+    private val NOTE_PREFIX = Regex("^(출처|자료|주\\s*[:：)]|주\\d|※|\\*|비고|참고|出典|出所|資料|注\\s*[:：)]|注\\d|備考|source|sources|note|notes)", RegexOption.IGNORE_CASE)
 
     private enum class Kind { E, N, T, S }
 
@@ -50,7 +52,7 @@ object GridAnalyzer {
         return out
     }
 
-    private val UNIT_PAREN = Regex("[\\(\\[（［]\\s*단위\\s*[:：][^\\)\\]）］]*[\\)\\]）］]")
+    private val UNIT_PAREN = Regex("[\\(\\[（［]\\s*(?:단위|単位|[Uu]nits?)\\s*[:：][^\\)\\]）］]*[\\)\\]）］]")
 
     private fun stripUnit(s: String): String = s.replace(UNIT_PAREN, "").trim()
 
@@ -121,7 +123,7 @@ object GridAnalyzer {
             block = block.drop(1)
             titleRows++
         }
-        if (titleRows > 0) report.add("맨 위 제목·단위 줄 ${titleRows}개를 표에서 분리했어요")
+        if (titleRows > 0) report.add(I18n.tr("맨 위 제목·단위 줄 ${titleRows}개를 표에서 분리했어요", "Separated $titleRows title/unit line(s) at the top", "上部のタイトル・単位行${titleRows}行を表から分けました"))
         // Note rows at the bottom.
         while (block.size >= 3) {
             val last = block.last()
@@ -133,13 +135,13 @@ object GridAnalyzer {
                 block = block.dropLast(1)
             } else break
         }
-        if (notes.isNotEmpty()) report.add("출처·메모 줄 ${notes.size}개를 표에서 분리했어요")
+        if (notes.isNotEmpty()) report.add(I18n.tr("출처·메모 줄 ${notes.size}개를 표에서 분리했어요", "Separated ${notes.size} source/note line(s)", "出典・注記${notes.size}行を表から分けました"))
         if (block.isEmpty()) return null
 
         // A "(단위: 천원)" cell sitting in the top-right corner row.
         if (block.size >= 3) {
             val r0 = block[0]
-            val unitCells = r0.filter { it.contains("단위") }
+            val unitCells = r0.filter { it.contains("단위") || it.contains("単位") || it.contains("Unit", true) }
             if (unitCells.size == 1 && r0.count { it.isNotEmpty() } == 1) {
                 UnitSpec.findInText(unitCells[0])?.let { unit = it }
                 block = block.drop(1)
@@ -152,9 +154,9 @@ object GridAnalyzer {
         if (headerCount == 0) {
             body = block
             header = List(width) { c ->
-                if (c == 0 && block.all { kind(it.getOrElse(0) { "" }, true) != Kind.N }) "항목" else if (width == 1) "값" else "값 ${c}"
-            }.let { h -> if (width >= 2 && h[0] == "항목") h.mapIndexed { i, s -> if (i == 0) s else if (width == 2) "값" else "값 $i" } else h }
-            report.add("머리글이 없어 열 이름을 붙였어요")
+                if (c == 0 && block.all { kind(it.getOrElse(0) { "" }, true) != Kind.N }) I18n.item() else if (width == 1) I18n.value() else I18n.valueN(c)
+            }.let { h -> if (width >= 2 && h[0] == I18n.item()) h.mapIndexed { i, s -> if (i == 0) s else if (width == 2) I18n.value() else I18n.valueN(i) } else h }
+            report.add(I18n.tr("머리글이 없어 열 이름을 붙였어요", "No header row, so columns were named", "見出し行がないため列名を付けました"))
         } else {
             val headRows = block.take(headerCount).map { it.toMutableList() }
             // Upper header rows: forward-fill blanks from the left (merged cells exported as blanks).
@@ -174,7 +176,7 @@ object GridAnalyzer {
                 parts.joinToString(" ")
             }
             body = block.drop(headerCount)
-            if (headerCount > 1) report.add("머리글 ${headerCount}줄을 합쳤어요")
+            if (headerCount > 1) report.add(I18n.tr("머리글 ${headerCount}줄을 합쳤어요", "Merged $headerCount header rows", "見出し${headerCount}行を結合しました"))
         }
         if (body.isEmpty()) return null
 
@@ -238,10 +240,9 @@ object GridAnalyzer {
         val numericBody = src.rows.sumOf { r -> timeCols.count { c -> KoreanNumber.parse(r.getOrElse(c) { "" }) != null } }
         if (numericBody < src.rows.size * timeCols.size * 0.6) return src
         val t = src.transposed()
-        val firstName = header[0].ifBlank { "기간" }
         return t.copy(
-            header = listOf(if (firstName == "구분" || firstName == "항목" || firstName.isBlank()) "기간" else "기간") + t.header.drop(1),
-            report = src.report + "기간이 가로로 놓여 있어서 행과 열을 바꿨어요",
+            header = listOf(I18n.period()) + t.header.drop(1),
+            report = src.report + I18n.tr("기간이 가로로 놓여 있어서 행과 열을 바꿨어요", "Periods ran across the top, so rows and columns were swapped", "期間が横に並んでいたため、行と列を入れ替えました"),
         )
     }
 }
