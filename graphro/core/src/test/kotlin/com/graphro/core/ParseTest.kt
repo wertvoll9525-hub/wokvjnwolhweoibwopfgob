@@ -301,3 +301,21 @@ class ImportTest {
         assertTrue(r.error!!.contains(".xlsx"))
     }
 }
+
+class FixNoiseTest {
+    @Test fun onlyOddCellsAreFlagged() {
+        val t = Importer.fromText("월\t매출\n1월\t320만\n2월\t280만원\n3월\t410만\n4월\t395\n5월\t452만\n6월\t4,380,000원").best!!.table
+        val flagged = t.fixes().map { it.row }.toSet()
+        assertEquals(setOf(3, 5), flagged)
+    }
+
+    @Test fun plainScaleIsNotAFix() {
+        val t = Importer.fromText("지역\t인구\n서울\t9411000\n부산\t3293000\n대구\t2374000").best!!.table
+        assertEquals(0, t.fixCount)
+    }
+
+    @Test fun onlyOneReadingIsOffered() {
+        val r = Importer.fromText("월\t매출\n1월\t320만\n2월\t280만\n3월\t410만")
+        assertEquals(1, r.candidates.size)
+    }
+}

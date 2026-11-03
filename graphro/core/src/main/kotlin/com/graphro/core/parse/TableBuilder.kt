@@ -274,14 +274,27 @@ object TableBuilder {
         val present = values.filterNotNull()
         val scale = chooseScale(present, unit, headerFactor)
 
+        // How each cell wrote its number: with 만/억/조, with k/M, or plain digits. A cell written
+        // differently from most of its column ("4,380,000원" among "320만") is worth pointing out.
+        fun form(p: KoreanNumber.Parsed): Double = p.bigFactor ?: if (p.hadMagnitude) -1.0 else 1.0
+        val forms = nums.filterNotNull().map { form(it.p) }
+        val majorityForm = forms.groupingBy { it }.eachCount().maxByOrNull { it.value }?.key
         val cells = raws.mapIndexed { r, raw ->
             val v = values[r]
             when {
                 KoreanNumber.isEmptyToken(raw) -> Cell(raw, Value.Empty)
                 v == null -> Cell(raw, Value.Empty, "숫자로 읽을 수 없어서 비웠어요")
                 else -> {
+                    val p = nums[r]!!.p
                     val shown = Format.plain(v / scale.factor)
-                    val fix = fixes[r] ?: describeChange(raw, nums[r]!!.p, shown, unit, scale, isPercent)
+                    val unitText = listOf(scale.label, unit ?: "").filter { it.isNotEmpty() }.joinToString(" ")
+                    val fix = fixes[r] ?: when {
+                        p.negativeMarker -> "‘${raw.trim()}’는 음수 표시라서 $shown(으)로 읽었어요"
+                        p.approx -> "‘약’을 빼고 $shown(으)로 읽었어요"
+                        forms.size >= 3 && majorityForm != null && form(p) != majorityForm && shown.replace(",", "") != raw.filter { it.isDigit() || it == '.' } ->
+                            "‘${raw.trim()}’를 다른 칸과 같은 단위로 맞췄어요 → $shown" + (if (unitText.isNotEmpty()) " ($unitText)" else "")
+                        else -> null
+                    }
                     Cell(raw, Value.Num(v), fix)
                 }
             }
@@ -308,20 +321,4 @@ object TableBuilder {
         }
     }
 
-    /** Explains a reinterpretation only when the shown number differs from what the cell literally said. */
-    private fun describeChange(raw: String, p: KoreanNumber.Parsed, shown: String, unit: String?, scale: Scale, isPercent: Boolean): String? {
-        val literal = raw.replace(",", "").replace(" ", "").replace(" ", "")
-            .let { s -> unit?.let { s.removeSuffix(it) } ?: s }
-            .removeSuffix("%").removePrefix("+").removePrefix("₩").removePrefix("$")
-        val shownCmp = shown.replace(",", "")
-        if (literal == shownCmp) return null
-        if (literal.toDoubleOrNull() != null && shownCmp.toDoubleOrNull() != null && literal.toDouble() == shownCmp.toDouble()) return null
-        val unitText = listOf(scale.label, unit ?: "").filter { it.isNotEmpty() }.joinToString(" ")
-        return when {
-            p.negativeMarker -> "‘${raw.trim()}’는 음수 표시라서 $shown(으)로 읽었어요"
-            p.approx -> "‘약’을 빼고 $shown(으)로 읽었어요"
-            p.hadMagnitude || scale != Scale.ONE -> "‘${raw.trim()}’ → $shown" + (if (unitText.isNotEmpty()) " ($unitText)" else "") + ". 표의 단위에 맞췄어요"
-            else -> null
-        }
-    }
 }

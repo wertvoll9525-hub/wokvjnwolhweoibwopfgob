@@ -24,12 +24,12 @@ object Importer {
         if (trimmed.startsWith("[") || trimmed.startsWith("{")) {
             runCatching { fromJson(trimmed, name) }.getOrNull()?.let { if (it.candidates.isNotEmpty()) return it }
         }
-        val out = ArrayList<Candidate>()
-        Delimited.sniff(t)?.let { grid -> out.addAll(candidatesFrom(grid.copy(name = name))) }
-        FreeText.parse(t)?.let { grid ->
-            out.addAll(candidatesFrom(grid.copy(name = name)).map { it.copy(score = it.score - 0.02) })
-        }
-        val good = out.filter { it.table.rowCount > 0 && it.table.columns.isNotEmpty() }
+        // Read the text both as a table and as loose sentences, then keep whichever reads better.
+        val asGrid = Delimited.sniff(t)?.let { grid -> candidatesFrom(grid.copy(name = name)) }.orEmpty()
+            .filter { it.table.rowCount > 0 && it.table.columns.isNotEmpty() }
+        val asText = FreeText.parse(t)?.let { grid -> candidatesFrom(grid.copy(name = name)).map { it.copy(score = it.score - 0.02) } }.orEmpty()
+            .filter { it.table.rowCount > 0 && it.table.columns.isNotEmpty() }
+        val good = if ((asText.maxOfOrNull { it.score } ?: -1.0) > (asGrid.maxOfOrNull { it.score } ?: -1.0)) asText else asGrid
         if (good.isEmpty()) return ImportResult(emptyList(), "표 모양을 찾지 못했어요. 엑셀에서 표를 복사하거나 ‘항목 숫자’처럼 줄마다 적어 주세요")
         return ImportResult(dedupe(good))
     }
