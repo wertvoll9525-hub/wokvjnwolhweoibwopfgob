@@ -7,7 +7,7 @@
 | Category | Productivity |
 | Price | Free (no ads, no in-app purchases) |
 | Contact email | wertvoll9525@gmail.com |
-| Privacy policy URL | https://wertvoll9525-hub.github.io/wokvjnwolhweoibwopfgob/privacy-en.html |
+| Privacy policy URL | https://github.com/wertvoll9525-hub/wokvjnwolhweoibwopfgob/blob/claude/clever-franklin-5j7txb/docs/privacy-en.md |
 
 ## Short description (max 80)
 Paste a table, get an honest chart. Cleans messy data and flags misleading axes.

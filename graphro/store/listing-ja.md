@@ -7,7 +7,7 @@
 | カテゴリ | 仕事効率化 |
 | 価格 | 無料（広告・アプリ内課金なし） |
 | 連絡先メール | wertvoll9525@gmail.com |
-| プライバシーポリシーURL | https://wertvoll9525-hub.github.io/wokvjnwolhweoibwopfgob/privacy-ja.html |
+| プライバシーポリシーURL | https://github.com/wertvoll9525-hub/wokvjnwolhweoibwopfgob/blob/claude/clever-franklin-5j7txb/docs/privacy-ja.md |
 
 ## 簡単な説明（80文字以内）
 表を貼るだけで、誠実なグラフに。単位の混在を整え、誤解を招く軸も指摘します。

@@ -9,7 +9,7 @@
 | 태그 추천 | 차트, 그래프, 엑셀, 프레젠테이션, 데이터 시각화 |
 | 가격 | 무료 (광고·인앱 결제 없음) |
 | 연락처 이메일 | wertvoll9525@gmail.com |
-| 개인정보처리방침 URL | https://wertvoll9525-hub.github.io/wokvjnwolhweoibwopfgob/privacy.html (GitHub Pages를 켜야 열려요. 아래 ‘출시 전 할 일’ 참고) |
+| 개인정보처리방침 URL | https://github.com/wertvoll9525-hub/wokvjnwolhweoibwopfgob/blob/claude/clever-franklin-5j7txb/docs/privacy.md |
 
 ## 간단한 설명 (80자 이내)
 표를 복사하면 차트가 돼요. 섞인 단위 정리, 차트 추천, 과장 검사까지 폰 안에서.
