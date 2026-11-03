@@ -33,9 +33,14 @@ class MainActivity : ComponentActivity() {
             navigationBarStyle = SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT),
         )
         val fromShare = savedInstanceState == null && handleIntent(intent)
+        // The intro animation plays at most once every 12 hours so frequent use isn't slowed down.
+        val prefs = com.wertvoll.graphro.data.Prefs(this)
+        val now = System.currentTimeMillis()
+        val playIntro = savedInstanceState == null && !fromShare && now - prefs.seenSplashAt > 12 * 3600_000L
+        if (playIntro) prefs.seenSplashAt = now
         setContent {
             GraphroTheme {
-                AppRoot(vm, playIntro = savedInstanceState == null && !fromShare)
+                AppRoot(vm, playIntro = playIntro)
             }
         }
     }

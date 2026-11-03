@@ -73,6 +73,15 @@ fun SettingsScreen(vm: AppViewModel) {
             Spacer(Modifier.height(20.dp))
         }
         Hairline(Modifier.padding(horizontal = 24.dp))
+        SettingRow(I18n.tr("언어", "Language", "言語"), I18n.tr("한국어 · English · 日本語", "한국어 · English · 日本語", "한국어 · English · 日本語")) {
+            // Android 13+ lets each app have its own language; older versions use the phone's language.
+            val i = if (android.os.Build.VERSION.SDK_INT >= 33)
+                Intent(android.provider.Settings.ACTION_APP_LOCALE_SETTINGS, Uri.parse("package:" + ctx.packageName))
+            else Intent(android.provider.Settings.ACTION_LOCALE_SETTINGS)
+            try { ctx.startActivity(i) } catch (_: ActivityNotFoundException) {
+                try { ctx.startActivity(Intent(android.provider.Settings.ACTION_LOCALE_SETTINGS)) } catch (_: ActivityNotFoundException) {}
+            }
+        }
         SettingRow(I18n.tr("개인정보처리방침", "Privacy policy", "プライバシーポリシー"), I18n.tr("수집하는 정보가 없어요", "We collect no data", "収集する情報はありません")) { vm.go(Screen.PRIVACY) }
         SettingRow(I18n.tr("오픈소스 라이선스", "Open-source licenses", "オープンソースライセンス"), "Pretendard, IBM Plex Mono") { vm.go(Screen.LICENSES) }
         SettingRow(I18n.tr("문의하기", "Contact", "お問い合わせ"), CONTACT_EMAIL) {

@@ -3,7 +3,7 @@
 ## 준비물
 | 항목 | 위치 |
 |---|---|
-| 서명된 AAB | `graphro/dist/release/graphro-1.1.0.aab` (한국어·영어·일본어 포함) |
+| 서명된 AAB | `graphro/dist/release/graphro-1.1.0.aab`, `-1.1.1.aab`, `-1.2.0.aab` (업데이트 순서대로, 출시 노트는 `store/release-notes.md`) |
 | 업로드 키 | `graphro-upload.jks` + `업로드키_정보.txt` (대화에서 따로 전달, 저장소에는 없음) |
 | 등록 문구 | `graphro/store/listing-ko.md`, `listing-en.md`, `listing-ja.md` |
 | 이미지 | `graphro/store/images/icon-512.png` + 언어별 `images/ko`, `images/en`, `images/ja` (그래픽 이미지, 스크린샷 6장) |
