@@ -1,0 +1,34 @@
+--------- beginning of crash
+11-03 08:03:47.706  5012  5012 E AndroidRuntime: FATAL EXCEPTION: main
+11-03 08:03:47.706  5012  5012 E AndroidRuntime: PID: 5012
+11-03 08:03:47.706  5012  5012 E AndroidRuntime: java.lang.NullPointerException: Attempt to invoke virtual method 'java.lang.CharSequence android.view.accessibility.AccessibilityNodeInfo.getContentDescription()' on a null object reference
+11-03 08:03:47.706  5012  5012 E AndroidRuntime: 	at com.android.uiautomator.core.AccessibilityNodeInfoDumper.childNafCheck(AccessibilityNodeInfoDumper.java:296)
+11-03 08:03:47.706  5012  5012 E AndroidRuntime: 	at com.android.uiautomator.core.AccessibilityNodeInfoDumper.nafCheck(AccessibilityNodeInfoDumper.java:276)
+11-03 08:03:47.706  5012  5012 E AndroidRuntime: 	at com.android.uiautomator.core.AccessibilityNodeInfoDumper.dumpNodeRec(AccessibilityNodeInfoDumper.java:200)
+11-03 08:03:47.706  5012  5012 E AndroidRuntime: 	at com.android.uiautomator.core.AccessibilityNodeInfoDumper.dumpNodeRec(AccessibilityNodeInfoDumper.java:225)
+11-03 08:03:47.706  5012  5012 E AndroidRuntime: 	at com.android.uiautomator.core.AccessibilityNodeInfoDumper.dumpNodeRec(AccessibilityNodeInfoDumper.java:225)
+11-03 08:03:47.706  5012  5012 E AndroidRuntime: 	at com.android.uiautomator.core.AccessibilityNodeInfoDumper.dumpNodeRec(AccessibilityNodeInfoDumper.java:225)
+11-03 08:03:47.706  5012  5012 E AndroidRuntime: 	at com.android.uiautomator.core.AccessibilityNodeInfoDumper.dumpNodeRec(AccessibilityNodeInfoDumper.java:225)
+11-03 08:03:47.706  5012  5012 E AndroidRuntime: 	at com.android.uiautomator.core.AccessibilityNodeInfoDumper.dumpNodeRec(AccessibilityNodeInfoDumper.java:225)
+11-03 08:03:47.706  5012  5012 E AndroidRuntime: 	at com.android.uiautomator.core.AccessibilityNodeInfoDumper.dumpNodeRec(AccessibilityNodeInfoDumper.java:225)
+11-03 08:03:47.706  5012  5012 E AndroidRuntime: 	at com.android.uiautomator.core.AccessibilityNodeInfoDumper.dumpWindowToFile(AccessibilityNodeInfoDumper.java:96)
+11-03 08:03:47.706  5012  5012 E AndroidRuntime: 	at com.android.commands.uiautomator.DumpCommand.run(DumpCommand.java:111)
+11-03 08:03:47.706  5012  5012 E AndroidRuntime: 	at com.android.commands.uiautomator.Launcher.main(Launcher.java:83)
+11-03 08:03:47.706  5012  5012 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit.nativeFinishInit(Native Method)
+11-03 08:03:47.706  5012  5012 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit.main(RuntimeInit.java:359)
+11-03 08:03:47.708  5012  5012 E AndroidRuntime: Error reporting crash
+11-03 08:03:47.708  5012  5012 E AndroidRuntime: java.lang.RuntimeException: Bad file descriptor
+11-03 08:03:47.708  5012  5012 E AndroidRuntime: 	at android.os.BinderProxy.transactNative(Native Method)
+11-03 08:03:47.708  5012  5012 E AndroidRuntime: 	at android.os.BinderProxy.transact(BinderProxy.java:584)
+11-03 08:03:47.708  5012  5012 E AndroidRuntime: 	at android.os.IServiceManager$Stub$Proxy.checkService(IServiceManager.java:443)
+11-03 08:03:47.708  5012  5012 E AndroidRuntime: 	at android.os.ServiceManagerProxy.getService(ServiceManagerNative.java:63)
+11-03 08:03:47.708  5012  5012 E AndroidRuntime: 	at android.os.ServiceManager.rawGetService(ServiceManager.java:378)
+11-03 08:03:47.708  5012  5012 E AndroidRuntime: 	at android.os.ServiceManager.getService(ServiceManager.java:147)
+11-03 08:03:47.708  5012  5012 E AndroidRuntime: 	at android.app.ActivityManager$3.create(ActivityManager.java:5214)
+11-03 08:03:47.708  5012  5012 E AndroidRuntime: 	at android.app.ActivityManager$3.create(ActivityManager.java:5211)
+11-03 08:03:47.708  5012  5012 E AndroidRuntime: 	at android.util.Singleton.get(Singleton.java:43)
+11-03 08:03:47.708  5012  5012 E AndroidRuntime: 	at android.app.ActivityManager.getService(ActivityManager.java:5202)
+11-03 08:03:47.708  5012  5012 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit$KillApplicationHandler.uncaughtException(RuntimeInit.java:160)
+11-03 08:03:47.708  5012  5012 E AndroidRuntime: 	at java.lang.ThreadGroup.uncaughtException(ThreadGroup.java:1071)
+11-03 08:03:47.708  5012  5012 E AndroidRuntime: 	at java.lang.ThreadGroup.uncaughtException(ThreadGroup.java:1066)
+11-03 08:03:47.708  5012  5012 E AndroidRuntime: 	at java.lang.Thread.dispatchUncaughtException(Thread.java:2306)
