@@ -25,7 +25,9 @@ def pick(test):
     for n in nodes:
         if test((n.get('text') or '').strip()) or test((n.get('content-desc') or '').strip()):
             return n
-n = pick(lambda t: t == want) or pick(lambda t: want in t)
+n = pick(lambda t: t == want)
+if n is None:
+    n = pick(lambda t: want in t)
 if n is not None:
     x1, y1, x2, y2 = map(int, re.findall(r'\d+', n.get('bounds')))
     print((x1 + x2) // 2, (y1 + y2) // 2)
