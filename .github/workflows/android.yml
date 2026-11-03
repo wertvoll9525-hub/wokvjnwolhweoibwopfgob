@@ -48,7 +48,16 @@ jobs:
           GRAPHRO_STORE_PASSWORD: ${{ secrets.GRAPHRO_STORE_PASSWORD }}
           GRAPHRO_KEY_ALIAS: ${{ secrets.GRAPHRO_KEY_ALIAS }}
           GRAPHRO_KEY_PASSWORD: ${{ secrets.GRAPHRO_KEY_PASSWORD }}
-        run: ./gradlew --no-daemon :core:test :app:assembleDebug :app:bundleRelease :app:assembleRelease 2>&1 | tee build.log; test ${PIPESTATUS[0]} -eq 0 || { grep -E "^e: |error:|What went wrong|^> |Could not|Unresolved|FAILED" build.log | head -80; exit 1; }
+        run: |
+          set +e
+          ./gradlew --no-daemon :core:test :app:assembleDebug :app:bundleRelease :app:assembleRelease > build.log 2>&1
+          code=$?
+          tail -n 40 build.log
+          if [ $code -ne 0 ]; then
+            echo "===== ERROR SUMMARY ====="
+            grep -E "^e: |error:|What went wrong|^> |Could not|Unresolved|FAILED|Exception" build.log | grep -v "^\s*at " | head -100
+            exit $code
+          fi
 
       - name: Upload build outputs
         if: always()
