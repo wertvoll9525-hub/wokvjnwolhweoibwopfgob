@@ -301,11 +301,11 @@ class ChartRenderer(private val fonts: ChartFonts, private val u: Float) {
                     var posAcc = 0.0; var negAcc = 0.0
                     d.series.forEachIndexed { si, s ->
                         val v = s.values[i] ?: return@forEachIndexed
-                        val color = when {
+                        val barColor = when {
                             single && hl >= 0 -> if (i == hl) spec.highlightColor else Colors.FOG
                             else -> seriesColor(si, d, spec)
                         }
-                        fill.color = color
+                        fill.color = barColor
                         val x0 = if (k == 1) l.centers[i] - barW / 2 else l.centers[i] - groupW / 2 + si * (groupW / k) + (groupW / k - barW) / 2
                         val (from, to) = if (spec.type == ChartType.STACKED) {
                             if (v >= 0) { val a = posAcc; posAcc += v; a to posAcc } else { val a = negAcc; negAcc += v; a to negAcc }
