@@ -268,7 +268,8 @@ fun TextInputDialog(
     singleLine: Boolean = true,
     confirmLabel: String = "확인",
 ) {
-    var text by remember { mutableStateOf(initial) }
+    // Start with the old value selected so typing replaces it.
+    var text by remember { mutableStateOf(androidx.compose.ui.text.input.TextFieldValue(initial, androidx.compose.ui.text.TextRange(0, initial.length))) }
     val focus = remember { FocusRequester() }
     Dialog(onDismissRequest = onDismiss) {
         Column(
@@ -277,7 +278,7 @@ fun TextInputDialog(
         ) {
             Text(title, style = T.heading)
             Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(G.Mist).padding(14.dp)) {
-                if (text.isEmpty()) Text(placeholder, style = T.body.copy(color = G.Faint))
+                if (text.text.isEmpty()) Text(placeholder, style = T.body.copy(color = G.Faint))
                 BasicTextField(
                     value = text,
                     onValueChange = { text = it },
@@ -290,7 +291,7 @@ fun TextInputDialog(
             }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Pill("취소", onDismiss, Modifier.weight(1f), kind = PillKind.Outline, height = 48.dp)
-                Pill(confirmLabel, { onConfirm(text) }, Modifier.weight(1f), kind = PillKind.Ink, height = 48.dp)
+                Pill(confirmLabel, { onConfirm(text.text) }, Modifier.weight(1f), kind = PillKind.Ink, height = 48.dp)
             }
         }
     }

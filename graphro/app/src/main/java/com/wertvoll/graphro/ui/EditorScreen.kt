@@ -382,7 +382,7 @@ private fun AxisPanel(vm: AppViewModel) {
             "${Format.plain(spec.axisMin ?: ax?.min ?: 0.0).replace(",", "")}, ${Format.plain(spec.axisMax ?: ax?.max ?: 100.0).replace(",", "")}",
             { custom = false },
             { t ->
-                val parts = t.split(Regex("[,~\\s]+")).mapNotNull { it.trim().toDoubleOrNull() }
+                val parts = Regex("-?\\d+(?:\\.\\d+)?").findAll(t.replace(",", " ").replace("~", " ")).mapNotNull { it.value.toDoubleOrNull() }.toList().take(2)
                 if (parts.size == 2 && parts[1] > parts[0]) vm.updateSpec { it.copy(axisMode = AxisMode.CUSTOM, axisMin = parts[0], axisMax = parts[1]) }
                 else vm.toast = "예: 0, 500 처럼 두 숫자를 적어 주세요"
                 custom = false

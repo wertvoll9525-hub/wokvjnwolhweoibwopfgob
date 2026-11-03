@@ -99,7 +99,7 @@ object Exporter {
                     is Value.Num -> com.graphro.core.text.Format.plain(v.v / c.scale.factor)
                     is Value.Time -> v.t.fullLabel()
                     is Value.Text -> v.s
-                    Value.Empty -> ""
+                    Value.Empty -> c.cells[r].raw
                 }
             }
         }
@@ -114,7 +114,7 @@ object Exporter {
                     is Value.Num -> v.v / c.scale.factor
                     is Value.Time -> v.t.fullLabel()
                     is Value.Text -> v.s
-                    Value.Empty -> null
+                    Value.Empty -> c.cells[r].raw.ifBlank { null }
                 }
             }
         }
