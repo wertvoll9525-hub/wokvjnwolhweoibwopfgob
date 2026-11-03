@@ -35,6 +35,16 @@ PY
   echo "tap $1 at $xy"
 }
 
+wait_text() {
+  for i in $(seq 1 20); do
+    adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1
+    adb pull /sdcard/ui.xml /tmp/ui.xml >/dev/null 2>&1
+    grep -q "$1" /tmp/ui.xml && return 0
+    sleep 1
+  done
+  echo "TIMEOUT waiting for: $1"; return 1
+}
+
 crashed() {
   if adb logcat -d | grep -E "FATAL EXCEPTION|ANR in $PKG" >/dev/null; then
     echo "!!! CRASH"; adb logcat -d | grep -A 40 "FATAL EXCEPTION" | head -80; return 0
@@ -46,7 +56,8 @@ adb shell am start -W -n $PKG/com.wertvoll.graphro.MainActivity
 shot 00-splash 0.6
 shot 01-home 3
 tap_text "예제" || fail=1
-shot 02-data 3
+wait_text "표를 이렇게" || fail=1
+shot 02-data 1.5
 tap_text "원문" && shot 02b-raw 1.5
 tap_text "표" ; sleep 1
 tap_text "차트 만들기" || fail=1
@@ -55,6 +66,12 @@ tap_text "강조" && shot 04-highlight 2
 tap_text "큰 변화" && shot 04b-change 2
 tap_text "축" && shot 05-axis 2
 tap_text "종류" && sleep 1 && tap_text "막대" && shot 05b-bar 2
+# Make an exaggerated axis so the honesty check has something to catch
+tap_text "축" && sleep 1 && tap_text "직접" && sleep 1.5
+for i in $(seq 1 24); do adb shell input keyevent 67; done
+adb shell input text "250,500"; sleep 0.5
+tap_text "확인"; sleep 1.5
+shot 05c-axis-250 1.5
 tap_text "검사" && shot 06-check 2.5
 adb shell input keyevent KEYCODE_BACK; sleep 1
 tap_text "내보내기" && shot 07-export-image 3
@@ -67,7 +84,8 @@ shot 10-home-recent 2
 printf '지역\t인구(명)\n서울\t9411000\n부산\t3293000\n대구\t2374000\n인천\t2997000\n광주\t1419000\n합계\t19494000\n' > /tmp/share.txt
 adb push /tmp/share.txt /data/local/tmp/share.txt >/dev/null
 adb shell 'am start -a android.intent.action.SEND -t text/plain --es android.intent.extra.TEXT "$(cat /data/local/tmp/share.txt)" -n '$PKG'/com.wertvoll.graphro.MainActivity'
-shot 11-shared-data 3
+wait_text "표를 이렇게" || fail=1
+shot 11-shared-data 1.5
 tap_text "차트 만들기" && shot 12-shared-chart 3
 adb shell input keyevent KEYCODE_BACK; sleep 1
 tap_text "설정" && shot 13-settings 2
